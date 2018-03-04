@@ -1,0 +1,22 @@
+# Amateur Radio Station routing definition
+ham_station.settings_tab:
+  route_name: ham_station.settings
+  title: 'Settings'
+  base_route: ham_station.settings
+
+entity.ham_station.canonical:
+  route_name: entity.ham_station.canonical
+  base_route: entity.ham_station.canonical
+  title: 'View'
+
+entity.ham_station.edit_form:
+  route_name: entity.ham_station.edit_form
+  base_route: entity.ham_station.canonical
+  title: 'Edit'
+
+entity.ham_station.delete_form:
+  route_name:  entity.ham_station.delete_form
+  base_route:  entity.ham_station.canonical
+  title: Delete
+  weight: 10
+

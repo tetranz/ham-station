@@ -1,0 +1,5 @@
+entity.ham_station.add_form:
+  route_name: entity.ham_station.add_form
+  title: 'Add Amateur Radio Station'
+  appears_on:
+    - entity.ham_station.collection

@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains ham_station.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ham_station_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the ham_station module.
+    case 'help.page.ham_station':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Information about amateur radio stations') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ham_station_theme() {
+  return [
+    'ham_station' => [
+      'render element' => 'children',
+    ],
+  ];
+}

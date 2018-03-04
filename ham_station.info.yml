@@ -1,0 +1,9 @@
+name: 'Ham Station'
+type: module
+description: 'Information about amateur radio stations'
+core: 8.x
+package: 'Custom'
+
+dependencies:
+  - address
+  - fcc_ham_data

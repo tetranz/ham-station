@@ -1,0 +1,14 @@
+
+# Amateur Radio Station menu items definition
+entity.ham_station.collection:
+  title: 'Amateur Radio Station list'
+  route_name: entity.ham_station.collection
+  description: 'List Amateur Radio Station entities'
+  parent: system.admin_structure
+  weight: 100
+
+ham_station.admin.structure.settings:
+  title: 'Amateur Radio Station settings'
+  description: 'Configure Amateur Radio Station entities'
+  route_name: ham_station.settings
+  parent: system.admin_structure

@@ -1,0 +1,19 @@
+add amateur radio station entities:
+  title: 'Create new Amateur Radio Station entities'
+
+administer amateur radio station entities:
+  title: 'Administer Amateur Radio Station entities'
+  description: 'Allow to access the administration form to configure Amateur Radio Station entities.'
+  restrict access: true
+
+delete amateur radio station entities:
+  title: 'Delete Amateur Radio Station entities'
+
+edit amateur radio station entities:
+  title: 'Edit Amateur Radio Station entities'
+
+view published amateur radio station entities:
+  title: 'View published Amateur Radio Station entities'
+
+view unpublished amateur radio station entities:
+  title: 'View unpublished Amateur Radio Station entities'
