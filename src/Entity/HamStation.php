@@ -18,6 +18,7 @@ use Drupal\user\UserInterface;
  *   id = "ham_station",
  *   label = @Translation("Amateur Radio Station"),
  *   handlers = {
+ *     "storage_schema" = "Drupal\ham_station\HamStationStorageSchema",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\ham_station\HamStationListBuilder",
  *     "views_data" = "Drupal\ham_station\Entity\HamStationViewsData",
