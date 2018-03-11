@@ -1,0 +1,7 @@
+ham_station.config:
+  path: '/admin/hamstation/config'
+  defaults:
+    _form: '\Drupal\ham_station\Form\HamStationConfigForm'
+    _title: 'Ham Station Configuration'
+  requirements:
+    _permission: 'administer site configuration'
