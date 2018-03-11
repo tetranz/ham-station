@@ -1,0 +1,4 @@
+services:
+  ham_station.fcc_importer:
+    class: Drupal\ham_station\Importers\FccImporter
+    arguments: ['@database']
