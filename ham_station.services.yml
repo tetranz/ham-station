@@ -1,4 +1,9 @@
 services:
+  logger.channel.ham_station:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['ham_station']
+
   ham_station.fcc_importer:
     class: Drupal\ham_station\Importers\FccImporter
-    arguments: ['@database']
+    arguments: ['@database', '@logger.channel.ham_station']

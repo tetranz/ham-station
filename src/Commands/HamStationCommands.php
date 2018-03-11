@@ -26,13 +26,26 @@ class HamStationCommands extends DrushCommands {
    * Import new licenses from fcc_ham_data module.
    *
    * @usage ham_station:import-fcc-new
-   *   Usage Import data from fcc_ham_data module.
+   *   Usage Import new licenses from fcc_ham_data module.
    *
    * @command ham_station:import-fcc-new
    * @aliases hsifccn
    */
   public function importFccNew() {
-    $this->fccImporter->importNew();
+    $this->fccImporter->importNewLicenses();
+  }
+
+  /**
+   * Update existing licenses from fcc_ham_data module.
+   *
+   * @usage ham_station:import-fcc-update
+   *   Usage existing licenses from fcc_ham_data module.
+   *
+   * @command ham_station:import-fcc-update
+   * @aliases hsifccu
+   */
+  public function importFccUpdate() {
+    $this->fccImporter->updateLicenses();
   }
 
 }
