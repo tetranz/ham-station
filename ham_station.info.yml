@@ -6,4 +6,5 @@ package: 'Custom'
 
 dependencies:
   - address
+  - geolocation
   - fcc_ham_data

@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.ham_station.field_location
+  module:
+    - geolocation
+    - ham_station
+id: ham_station.ham_station.field_location
+field_name: field_location
+entity_type: ham_station
+bundle: ham_station
+label: Location
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation

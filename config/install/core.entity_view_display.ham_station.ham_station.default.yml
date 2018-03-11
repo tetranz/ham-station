@@ -1,0 +1,132 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.ham_station.ham_station.field_location
+  module:
+    - address
+    - geolocation
+    - ham_station
+    - options
+    - user
+id: ham_station.ham_station.default
+targetEntityType: ham_station
+bundle: ham_station
+mode: default
+content:
+  address:
+    label: above
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+    type: address_default
+  address_hash:
+    label: above
+    type: string
+    weight: 11
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  address_type:
+    label: above
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  callsign:
+    label: above
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  field_location:
+    weight: 46
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_latlng
+    region: content
+  first_name:
+    label: above
+    type: string
+    weight: 1
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  geolocation_status:
+    label: above
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  last_name:
+    label: above
+    type: string
+    weight: 3
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  middle_name:
+    label: above
+    type: string
+    weight: 2
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  operator_class:
+    label: above
+    type: string
+    weight: 7
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  organization:
+    label: above
+    type: string
+    weight: 5
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  previous_callsign:
+    label: above
+    type: string
+    weight: 8
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  suffix:
+    label: above
+    type: string
+    weight: 4
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  total_hash:
+    label: above
+    type: string
+    weight: 10
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  user_id:
+    label: hidden
+    type: author
+    weight: 45
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }
