@@ -3,6 +3,7 @@
 namespace Drupal\ham_station\Commands;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
+use Drupal\ham_station\Geocoder;
 use Drupal\ham_station\Importers\FccImporter;
 use Drush\Commands\DrushCommands;
 
@@ -18,8 +19,16 @@ class HamStationCommands extends DrushCommands {
    */
   private $fccImporter;
 
-  public function __construct(FccImporter $fcc_importer) {
+  /**
+   * The geocoder service.
+   *
+   * @var Geocoder
+   */
+  private $geocoder;
+
+  public function __construct(FccImporter $fcc_importer, Geocoder $geocoder) {
     $this->fccImporter = $fcc_importer;
+    $this->geocoder = $geocoder;
   }
 
   /**
@@ -32,7 +41,7 @@ class HamStationCommands extends DrushCommands {
    * @aliases hsifccn
    */
   public function importFccNew() {
-    $this->fccImporter->importNewLicenses();
+    $this->fccImporter->importNewLicenses([$this->io(), 'writeln']);
   }
 
   /**
@@ -45,7 +54,20 @@ class HamStationCommands extends DrushCommands {
    * @aliases hsifccu
    */
   public function importFccUpdate() {
-    $this->fccImporter->updateLicenses();
+    $this->fccImporter->updateLicenses([$this->io(), 'writeln']);
+  }
+
+  /**
+   * Geocode some addresses.
+   *
+   * @usage ham_station:geocode
+   *   Geocode some addresses.
+   *
+   * @command ham_station:geocode
+   * @aliases hsigeo
+   */
+  public function geocode() {
+    $this->geocoder->geoCode([$this->io(), 'writeln']);
   }
 
 }

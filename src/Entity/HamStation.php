@@ -7,6 +7,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\ham_station\Geocoder;
 use Drupal\user\UserInterface;
 
 /**
@@ -57,6 +58,13 @@ use Drupal\user\UserInterface;
 class HamStation extends ContentEntityBase implements HamStationInterface {
 
   use EntityChangedTrait;
+
+  /**
+   * Allowed values for the geocode_status field.
+   */
+  const GEOCODE_STATUS_PENDING = 0;
+  const GEOCODE_STATUS_SUCCESS = 1;
+  const GEOCODE_STATUS_NOT_FOUND = 2;
 
   /**
    * {@inheritdoc}
@@ -207,12 +215,12 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['geolocation_status'] = BaseFieldDefinition::create('list_integer')
-      ->setLabel(t('Geolocation status'))
+    $fields['geocode_status'] = BaseFieldDefinition::create('list_integer')
+      ->setLabel(t('Geocode status'))
       ->setSetting('allowed_values', [
-        0 => 'Pending',
-        1 => 'Success',
-        2 => 'Fail',
+        static::GEOCODE_STATUS_PENDING => 'Pending',
+        static::GEOCODE_STATUS_SUCCESS => 'Success',
+        static::GEOCODE_STATUS_NOT_FOUND => 'Not found',
       ])
       ->setDisplayOptions('view', [
         'label' => 'above',
@@ -223,6 +231,24 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $weight++;
+
+    $fields['geocode_response'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Geocode response'))
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => $weight,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => $weight,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(FALSE);
 
     $weight++;
     $fields['total_hash'] = static::stringFieldDef('Total hash', 40, $weight++);

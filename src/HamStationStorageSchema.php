@@ -21,6 +21,10 @@ class HamStationStorageSchema extends SqlContentEntityStorageSchema {
       case 'callsign':
         $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
         break;
+
+      case 'address_hash':
+        $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
+        break;
     }
 
     return $schema;
