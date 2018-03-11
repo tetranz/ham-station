@@ -1,0 +1,6 @@
+services:
+  ham_station.commands:
+    class: \Drupal\ham_station\Commands\HamStationCommands
+    arguments: ['@ham_station.fcc_importer']
+    tags:
+      - { name: drush.command }
