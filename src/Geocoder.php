@@ -83,6 +83,12 @@ class Geocoder {
     $this->logger = $logger;
   }
 
+  /**
+   * Geocode a batch of addresses.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
   public function geoCode(callable $callback = NULL) {
     $google_key = $this->settings->get('google_geocode_key');
 
@@ -109,13 +115,13 @@ class Geocoder {
       ])
       ->range(0, $batch_size);
 
-    // Using this mostly to get started with a small state.
+    // Using this mostly to get started with experimental queries.
     $extra_where = $this->settings->get('extra_batch_query_where');
     if (!empty($extra_where)) {
       $query->where($extra_where);
     }
 
-    $entity_rows =$query->execute();
+    $entity_rows = $query->execute();
 
     $success_count = 0;
     $not_found_count = 0;
@@ -277,6 +283,58 @@ class Geocoder {
     );
 
     return $url->toString();
+  }
+
+  /**
+   * Copy successful geocode results to other licenses at the same address.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
+  public function copyGeocodeForDuplicates(callable $callback) {
+    // This avoids wasting our Google query quota on duplicates.
+    $query = $this->dbConnection->select('ham_station', 'hs1');
+    $query->addField('hs1', 'id', 'success_id');
+    $query->addField('hs2', 'id', 'other_id');
+
+    $query->innerJoin(
+      'ham_station',
+      'hs2',
+      'hs2.address_hash = hs1.address_hash AND hs2.geocode_status <> :success_status',
+      [':success_status' => HamStation::GEOCODE_STATUS_SUCCESS]
+    );
+
+    $rows = $query->condition('hs1.geocode_status', HamStation::GEOCODE_STATUS_SUCCESS)
+      ->orderBy('hs1.id')
+      ->execute();
+
+    /** @var HamStation $success_entity */
+    $success_entity = NULL;
+    $update_count = 0;
+
+    foreach ($rows as $row) {
+      if (empty($success_entity) || $success_entity->id() != $row->success_id) {
+        $success_entity = HamStation::load($row->success_id);
+      }
+
+      /** @var HamStation $other_entity */
+      $other_entity = HamStation::load($row->other_id);
+
+      $other_entity->field_location->lat = $success_entity->field_location->lat;
+      $other_entity->field_location->lng = $success_entity->field_location->lng;
+      $other_entity->geocode_response = $success_entity->geocode_response;
+      $other_entity->geocode_status = $success_entity->geocode_status;
+      $other_entity->save();
+      $update_count++;
+    }
+
+    $msg = sprintf(
+      '%s geocode results copied to duplicate addresses',
+      $update_count
+    );
+
+    $this->logger->info($msg);
+    $this->printFeedback($msg, $callback);
   }
 
   /**

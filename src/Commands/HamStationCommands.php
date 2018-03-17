@@ -70,4 +70,17 @@ class HamStationCommands extends DrushCommands {
     $this->geocoder->geoCode([$this->io(), 'writeln']);
   }
 
+  /**
+   * Copy geocode results for duplicate addresses
+   *
+   * @usage ham_station:copygeo
+   *   opy geocode results for duplicate addresses.
+   *
+   * @command ham_station:copygeo
+   * @aliases hsicpgeo
+   */
+  public function copyGeocodeForDuplicates() {
+    $this->geocoder->copyGeocodeForDuplicates([$this->io(), 'writeln']);
+  }
+
 }
