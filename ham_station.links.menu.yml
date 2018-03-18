@@ -12,3 +12,9 @@ ham_station.admin.structure.settings:
   description: 'Configure Amateur Radio Station entities'
   route_name: ham_station.settings
   parent: system.admin_structure
+
+ham_station.admin.config:
+  title: 'Amateur Radio Station config'
+  description: 'Configure Amateur Radio Station module'
+  route_name: ham_station.config
+  parent: system.admin_config_services
