@@ -29,7 +29,29 @@ function ham_station_help($route_name, RouteMatchInterface $route_match) {
 function ham_station_theme() {
   return [
     'ham_station' => [
-      'render element' => 'children',
+      'render element' => 'elements',
     ],
   ];
+}
+
+/**
+ * Implements hook_preprocess() for ham_station.
+ */
+function template_preprocess_ham_station(&$variables) {
+  /** @var \Drupal\ham_station\Entity\HamStation $entity */
+  $entity = $variables['elements']['#ham_station'];
+
+  $variables['callsign'] = $entity->callsign->value;
+
+  if (empty($entity->organization->value)) {
+    $variables['name'] = sprintf('%s %s %s',
+      $entity->first_name->value, $entity->middle_name->value, $entity->last_name->value
+    );
+  } else {
+    $variables['name'] = $entity->organization->value;
+  }
+
+  $variables['address'] = $variables['elements']['address'];
+  $variables['attributes']['data-lat'] = $entity->field_location->lat;
+  $variables['attributes']['data-lng'] = $entity->field_location->lng;
 }
