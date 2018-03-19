@@ -1,0 +1,25 @@
+{
+  "name": "tetranz/ham_station",
+  "description": "Information about amateur radio stations.",
+  "type": "drupal-module",
+  "homepage": "https://github.com/tetranz/ham-station",
+  "authors": [
+    {
+      "name": "Ross Keatinge (KT1F)",
+      "email": "tetranz@gmail.com",
+      "role": "Maintainer"
+    }
+  ],
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "require": {
+    "tetranz/fcc_ham_data": "dev-master"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
+  }
+}
