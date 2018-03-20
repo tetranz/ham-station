@@ -44,7 +44,7 @@ class HamStationConfigForm extends ConfigFormBase {
     $form[$key] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable geocoding on cron'),
-      '#description' => $this->t('Geo code a batch of addresses on cron.'),
+      '#description' => $this->t('Geocode a batch of addresses on cron.'),
       '#default_value' => $config->get($key),
     ];
 
