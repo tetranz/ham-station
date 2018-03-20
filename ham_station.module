@@ -24,6 +24,23 @@ function ham_station_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
+ * Implements hook_cron().
+ */
+function ham_station_cron() {
+  $config = \Drupal::configFactory()->get('ham_station.settings');
+
+  if (!$config->get('geocode_cron_enable')) {
+    return;
+  }
+
+  /** @var \Drupal\ham_station\Geocoder $geocoder */
+  $geocoder = \Drupal::service('ham_station.geocoder');
+
+  $geocoder->geoCode();
+  $geocoder->copyGeocodeForDuplicates();
+}
+
+/**
  * Implements hook_theme().
  */
 function ham_station_theme() {
