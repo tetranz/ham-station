@@ -291,7 +291,7 @@ class Geocoder {
    * @param callable $callback
    *   Optional callable used to report progress.
    */
-  public function copyGeocodeForDuplicates(callable $callback) {
+  public function copyGeocodeForDuplicates(callable $callback = NULL) {
     // This avoids wasting our Google query quota on duplicates.
     $query = $this->dbConnection->select('ham_station', 'hs1');
     $query->addField('hs1', 'id', 'success_id');
