@@ -43,10 +43,15 @@ function ham_station_cron() {
 /**
  * Implements hook_theme().
  */
-function ham_station_theme() {
+function ham_station_theme($existing, $type, $theme, $path) {
   return [
     'ham_station' => [
       'render element' => 'elements',
+    ],
+    'ham_neighbors' => [
+      'variables' => [
+        'form' => NULL,
+      ],
     ],
   ];
 }
