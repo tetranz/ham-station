@@ -260,6 +260,12 @@ class Geocoder {
    */
   private function getGeoCodeUrl(HamStation $entity, $google_key) {
     $address = $entity->address;
+    $address1 = $address->address_line1;
+
+    // Some addresses are like 123 ABC St, PO Box 100. Remove the PO Box.
+    if (preg_match('/,\s*?((po)|(p\.o\.))\s+?box\s.*$/i', $address1, $matches) === 1) {
+      $address1 = trim(str_replace($matches[0], '', $address1));
+    }
 
     // See https://developers.google.com/maps/documentation/geocoding/start
     // This seems to be the correct format. i.e., postal code is not included
@@ -269,7 +275,7 @@ class Geocoder {
       'https://maps.googleapis.com/maps/api/geocode/json', [
         'query' => [
           'address' => sprintf('%s,%s,%s',
-            $address->address_line1,
+            $address1,
             $address->locality,
             $address->administrative_area
           ),
