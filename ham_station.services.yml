@@ -11,3 +11,7 @@ services:
   ham_station.geocoder:
     class: Drupal\ham_station\Geocoder
     arguments: ['@config.factory', '@http_client', '@entity_type.manager', '@database', '@logger.channel.ham_station']
+
+  ham_station.ham_neighbors:
+    class: Drupal\ham_station\HamNeighborsService
+    arguments: ['@form_builder']

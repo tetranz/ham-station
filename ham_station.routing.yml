@@ -5,3 +5,12 @@ ham_station.config:
     _title: 'Ham Station Configuration'
   requirements:
     _permission: 'administer site configuration'
+
+ham_station.ham_neighbors:
+  path: '/neighbors/{callsign}'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::hamNeighbors'
+    _title: 'Ham Neighbors'
+    callsign: null
+  requirements:
+    _permission: 'administer-views'

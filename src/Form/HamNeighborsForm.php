@@ -20,15 +20,28 @@ class HamNeighborsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $args = func_get_args();
+    $callsign = strtoupper($args[2]);
+
+    $form['#attributes'] = [
+      'class' => ['form-inline', 'form-search'],
+    ];
+
     $form['callsign'] = [
       '#type' => 'textfield',
       '#title' => 'Callsign',
-      '#description' => 'Enter your (or someone else\'s) callsign to see neighboring hams',
+      '#default_value' => $callsign,
+      '#attributes' => [
+        'class' => ['form-group']
+      ],
     ];
 
     $form['submit'] = [
-      '#type' => 'button',
-      '#value' => $this->t('Search'),
+      '#type' => 'submit',
+      '#value' => $this->t('Find the neighbors'),
+      '#attributes' => [
+        'class' => ['btn', 'btn-primary']
+      ],
     ];
 
     return $form;
@@ -38,7 +51,10 @@ class HamNeighborsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // TODO: Implement submitForm() method.
+    $form_state->setRedirect(
+      'ham_station.ham_neighbors',
+      ['callsign' => $form_state->getValue('callsign')]
+    );
   }
 
 }
