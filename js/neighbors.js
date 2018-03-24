@@ -21,18 +21,35 @@
         center: {lat: lat, lng: lng}
       });
 
+      var markers = [];
+
       self.$view.find('.ham-station').each(function (index) {
         var $ham_station = $(this);
+        var id = $ham_station.data('id');
+        var loc_id = $ham_station.data('loc-id');
+        var marker = null;
+        var callsign = $ham_station.find('.callsign').text();
+
+        if (loc_id) {
+          marker = markers[loc_id];
+          marker.setTitle(marker.getTitle() + "\n" + callsign);
+          if (marker.getLabel().slice(-1) !== '+') {
+            marker.setLabel(marker.getLabel() + '+');
+          }
+          return;
+        }
+
         var lat = parseFloat($ham_station.data('lat'));
         var lng = parseFloat($ham_station.data('lng'));
 
-        var marker = new google.maps.Marker({
+        marker = new google.maps.Marker({
           position: {lat: lat, lng: lng},
           map: map,
-          draggable:true,
-          title: $ham_station.find('.callsign').text()
+          title: callsign,
+          label: callsign
         });
 
+        markers[id] = marker;
       });
     }
 

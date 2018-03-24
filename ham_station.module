@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_help().
@@ -72,11 +73,13 @@ function ham_station_library_info_alter(&$libraries, $extension) {
   $maps_lib = NULL;
 
   foreach ($js_libs as $key => $lib) {
-    if (strpos($key, 'maps.googleapis.com') !== FALSE) {
-      $maps_lib_key = $key;
-      $maps_lib = $lib;
-      break;
+    if (strpos($key, 'maps.googleapis.com') == FALSE) {
+      continue;
     }
+
+    $maps_lib_key = $key;
+    $maps_lib = $lib;
+    break;
   }
 
   $api_key = \Drupal::configFactory()
@@ -110,4 +113,31 @@ function template_preprocess_ham_station(&$variables) {
   $variables['address'] = $variables['elements']['address'];
   $variables['attributes']['data-lat'] = $entity->field_location->lat;
   $variables['attributes']['data-lng'] = $entity->field_location->lng;
+}
+
+/**
+ * Implements hook_views_post_execute();
+ */
+function ham_station_views_post_execute(ViewExecutable $view) {
+  if (!($view->id() === 'ham_neighbors' && $view->current_display === 'default')) {
+    return;
+  }
+
+  // Set a location_id property on rows which have the same location as a
+  // previous row. This helps us have a single map marker per location.  
+  $prev_latlng = NULL;
+  $prev_id = NULL;
+
+  foreach ($view->result as $row) {
+    $entity = $row->_entity;
+    $latlng = sprintf('%s|%s', $entity->field_location->lat, $entity->field_location_lng);
+
+    if ($latlng === $prev_latlng) {
+      $row->location_id = $prev_id;
+    }
+    else {
+      $prev_id = $row->id;
+      $prev_latlng = $latlng;
+    }
+  }
 }
