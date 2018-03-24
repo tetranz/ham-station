@@ -51,6 +51,8 @@ function ham_station_theme($existing, $type, $theme, $path) {
     'ham_neighbors' => [
       'variables' => [
         'form' => NULL,
+        'callsign' => NULL,
+        'status' => NULL,
         'view' => NULL,
       ],
     ],

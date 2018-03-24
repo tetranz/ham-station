@@ -21,7 +21,7 @@ class HamNeighborsForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $args = func_get_args();
-    $callsign = strtoupper($args[2]);
+    $callsign = $args[2];
 
     $form['#attributes'] = [
       'class' => ['form-inline', 'form-search'],

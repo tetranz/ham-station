@@ -1,5 +1,22 @@
 <div class="ham-neighbors">
   <p>Enter your (or someone else's) callsign to see neighboring hams.</p>
   {{ form }}
-  {{ view }}
+
+  {% if status == constant('Drupal\\ham_station\\HamNeighborsService::STATUS_NOT_GEOCODED') %}
+    <p>Sorry, we haven't geocoded {{ callsign }} yet.</p>
+  {% endif %}
+
+  {% if status == constant('Drupal\\ham_station\\HamNeighborsService::STATUS_GEO_NOT_FOUND') %}
+    <p>Sorry, the geocoding service was not able to find {{ callsign }}'s address.</p>
+  {% endif %}
+
+  {% if status == constant('Drupal\\ham_station\\HamNeighborsService::STATUS_NOT_IN_DB') %}
+    <p>Sorry, {{ callsign }} is not in the database.</p>
+  {% endif %}
+
+  {% if status == constant('Drupal\\ham_station\\HamNeighborsService::STATUS_OK') %}
+    <p><strong>{{ callsign }}</strong> and Neighbors</p>
+    {{ view }}
+  {% endif %}
+
 </div>

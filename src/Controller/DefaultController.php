@@ -23,7 +23,7 @@ class DefaultController extends ControllerBase {
     /** @var HamNeighborsService $service */
     $service = \Drupal::service('ham_station.ham_neighbors');
 
-    return $service->render($callsign);
+    return $service->render(strtoupper(trim($callsign)));
   }
 
 }
