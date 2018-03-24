@@ -39,6 +39,20 @@ class HamNeighborsService {
    */
   private $viewRenderArray;
 
+  /**
+   * Latitude of queried station.
+   *
+   * @var float
+   */
+  private $lat;
+
+  /**
+   * Longitude of queried station.
+   *
+   * @var float
+   */
+  private $lng;
+
   public function __construct(FormBuilder $form_builder, EntityTypeManagerInterface $entity_type_manager) {
     $this->formBuilder = $form_builder;
     $this->hamStationStorage = $entity_type_manager->getStorage('ham_station');
@@ -66,6 +80,12 @@ class HamNeighborsService {
       '#view' => $this->viewRenderArray,
       '#attached' => [
         'library' => ['ham_station/neighbors'],
+        'drupalSettings' => [
+          'ham_neighbors' => [
+            'lat' => $this->lat,
+            'lng' => $this->lng,
+          ]
+        ]
       ],
     ];
   }
@@ -80,6 +100,10 @@ class HamNeighborsService {
    *   The status.
    */
   private function processRequest($callsign) {
+    $this->viewRenderArray = NULL;
+    $this->lat = NULL;
+    $this->lng = NULL;
+
     if (empty($callsign)) {
       return self::STATUS_NO_CALLSIGN;
     }
@@ -98,8 +122,11 @@ class HamNeighborsService {
       return self::STATUS_GEO_NOT_FOUND;
     }
 
+    $this->lat = $entity->field_location->lat;
+    $this->lng = $entity->field_location->lng;
+
     // Looks good so generate the view render array.
-    $arg = sprintf('%s,%s<100miles', $entity->field_location->lat, $entity->field_location->lng);
+    $arg = sprintf('%s,%s<100miles', $this->lat, $this->lng);
     $this->viewRenderArray = views_embed_view('ham_neighbors', 'default', $arg);
 
     return self::STATUS_OK;

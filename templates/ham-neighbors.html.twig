@@ -16,7 +16,7 @@
 
   {% if status == constant('Drupal\\ham_station\\HamNeighborsService::STATUS_OK') %}
     <p><strong>{{ callsign }}</strong> and Neighbors</p>
+    <div id="map"></div>
     {{ view }}
   {% endif %}
-
 </div>
