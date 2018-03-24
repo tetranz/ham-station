@@ -60,6 +60,37 @@ function ham_station_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_library_info_alter().
+ */
+function ham_station_library_info_alter(&$libraries, $extension) {
+  if ($extension !== 'ham_station') {
+    return;
+  }
+
+  $js_libs = &$libraries['neighbors']['js'];
+  $maps_lib_key = NULL;
+  $maps_lib = NULL;
+
+  foreach ($js_libs as $key => $lib) {
+    if (strpos($key, 'maps.googleapis.com') !== FALSE) {
+      $maps_lib_key = $key;
+      $maps_lib = $lib;
+      break;
+    }
+  }
+
+  $api_key = \Drupal::configFactory()
+    ->get('ham_station.settings')
+    ->get('google_api_key');
+
+  unset($js_libs[$maps_lib_key]);
+
+  // Add our Google API key.
+  $maps_lib_key = str_replace('YOUR_API_KEY', $api_key, $maps_lib_key);
+  $js_libs[$maps_lib_key] = $maps_lib;
+}
+
+/**
  * Implements hook_preprocess() for ham_station.
  */
 function template_preprocess_ham_station(&$variables) {
