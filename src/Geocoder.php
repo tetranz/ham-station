@@ -292,7 +292,7 @@ class Geocoder {
   }
 
   /**
-   * Copy successful geocode results to other licenses at the same address.
+   * Copy geocode results to other licenses at the same address.
    *
    * @param callable $callback
    *   Optional callable used to report progress.
@@ -300,36 +300,36 @@ class Geocoder {
   public function copyGeocodeForDuplicates(callable $callback = NULL) {
     // This avoids wasting our Google query quota on duplicates.
     $query = $this->dbConnection->select('ham_station', 'hs1');
-    $query->addField('hs1', 'id', 'success_id');
+    $query->addField('hs1', 'id', 'done_id');
     $query->addField('hs2', 'id', 'other_id');
 
     $query->innerJoin(
       'ham_station',
       'hs2',
-      'hs2.address_hash = hs1.address_hash AND hs2.geocode_status <> :success_status',
-      [':success_status' => HamStation::GEOCODE_STATUS_SUCCESS]
+      'hs2.address_hash = hs1.address_hash AND hs2.geocode_status = :pending_status',
+      [':pending_status' => HamStation::GEOCODE_STATUS_PENDING]
     );
 
-    $rows = $query->condition('hs1.geocode_status', HamStation::GEOCODE_STATUS_SUCCESS)
+    $rows = $query->condition('hs1.geocode_status', HamStation::GEOCODE_STATUS_PENDING, '<>')
       ->orderBy('hs1.id')
       ->execute();
 
-    /** @var HamStation $success_entity */
-    $success_entity = NULL;
+    /** @var HamStation $done_entity */
+    $done_entity = NULL;
     $update_count = 0;
 
     foreach ($rows as $row) {
-      if (empty($success_entity) || $success_entity->id() != $row->success_id) {
-        $success_entity = HamStation::load($row->success_id);
+      if (empty($done_entity) || $done_entity->id() != $row->done_id) {
+        $done_entity = HamStation::load($row->done_id);
       }
 
       /** @var HamStation $other_entity */
       $other_entity = HamStation::load($row->other_id);
 
-      $other_entity->field_location->lat = $success_entity->field_location->lat;
-      $other_entity->field_location->lng = $success_entity->field_location->lng;
-      $other_entity->geocode_response = $success_entity->geocode_response;
-      $other_entity->geocode_status = $success_entity->geocode_status;
+      $other_entity->field_location->lat = $done_entity->field_location->lat;
+      $other_entity->field_location->lng = $done_entity->field_location->lng;
+      $other_entity->geocode_response = $done_entity->geocode_response;
+      $other_entity->geocode_status = $done_entity->geocode_status;
       $other_entity->save();
       $update_count++;
     }
