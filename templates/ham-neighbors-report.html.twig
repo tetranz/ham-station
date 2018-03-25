@@ -1,0 +1,23 @@
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-condensed table-bordered ham-neighbors-counts">
+      <thead>
+      <tr>
+      <th>State</th><th>Not attempted</th><th>Successful</th><th>Not Found</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for state, values in data %}
+
+      <tr>
+        <td>{{ state }}</td>
+        <td>{{ values.0 }}</td>
+        <td>{{ values.1 }}</td>
+        <td>{{ values.2 }}</td>
+      </tr>
+
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
