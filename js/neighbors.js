@@ -1,6 +1,8 @@
 (function ($) {
   Drupal.behaviors.ham_neighbors = {
     $view: null,
+    active_infowindow: null,
+
     attach: function (context, settings) {
       var self = this;
       var mysettings = settings.ham_neighbors;
@@ -22,20 +24,23 @@
       });
 
       var markers = [];
+      var infowindows = [];
 
       self.$view.find('.ham-station').each(function (index) {
         var $ham_station = $(this);
         var id = $ham_station.data('id');
         var loc_id = $ham_station.data('loc-id');
-        var marker = null;
+        var marker;
+        var infowindow;
         var callsign = $ham_station.find('.callsign').text();
 
         if (loc_id) {
           marker = markers[loc_id];
-          marker.setTitle(marker.getTitle() + "\n" + callsign);
           if (marker.getLabel().slice(-1) !== '+') {
             marker.setLabel(marker.getLabel() + '+');
           }
+          infowindow = infowindows[loc_id];
+          infowindow.setContent(infowindow.getContent() + $ham_station.html());
           return;
         }
 
@@ -45,12 +50,32 @@
         marker = new google.maps.Marker({
           position: {lat: lat, lng: lng},
           map: map,
-          title: callsign,
           label: callsign
         });
 
         markers[id] = marker;
+
+        infowindow = new google.maps.InfoWindow({
+          content: "<div class='infowindow'>" + $ham_station.html()
+        });
+
+        infowindows[id] = infowindow;
+
+        marker.addListener('click', function () {
+          if (self.active_infowindow) {
+            self.active_infowindow.close();
+          }
+          infowindow.open(self.map, marker);
+          self.active_infowindow = infowindow;
+        });
+
       });
+
+      var infowindow;
+      for (var id in infowindows) {
+        infowindow = infowindows[id];
+        infowindow.setContent(infowindow.getContent() + "</div>");
+      }
     }
 
   };
