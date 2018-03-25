@@ -1,6 +1,7 @@
 <div class="ham-neighbors-wrapper">
   <p>Enter your (or someone else's) callsign to see neighboring hams.</p>
   {{ form }}
+  <div class="info-block"{% if not view %} style="display: none;"{% endif %}>{{ info|raw }}</div>
   <p class="message"{% if not message %} style="display: none;"{% endif %}>{{ message }}</p>
   <h2 class="results-title"{% if not view %} style="display: none;"{% endif %}><span class="callsign">{{ callsign }}</span> and neighbors</h2>
   <div class="map-container" style="display: none;"></div>

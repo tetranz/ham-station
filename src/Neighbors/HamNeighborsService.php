@@ -2,6 +2,7 @@
 
 namespace Drupal\ham_station\Neighbors;
 
+use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilder;
 use Drupal\Core\Render\RendererInterface;
@@ -34,6 +35,13 @@ class HamNeighborsService {
   private $hamStationStorage;
 
   /**
+   * Entity storage for block_content.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  private $blockContentStorage;
+
+  /**
    * The renderer.
    *
    * @var \Drupal\Core\Render\RendererInterface
@@ -53,6 +61,7 @@ class HamNeighborsService {
   public function __construct(FormBuilder $form_builder, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer) {
     $this->formBuilder = $form_builder;
     $this->hamStationStorage = $entity_type_manager->getStorage('ham_station');
+    $this->blockContentStorage = $entity_type_manager->getStorage('block_content');
     $this->renderer = $renderer;
   }
 
@@ -72,12 +81,23 @@ class HamNeighborsService {
     // bookmarkable and means that non-Javascript users still get the list.
     $response = $this->processSearchRequest($callsign);
 
+    $info = NULL;
+    $block_entity = $this->blockContentStorage->loadByProperties([
+      'info' => 'neighbors-info'
+    ]);
+
+    if (!empty($block_entity)) {
+      $block_entity = reset($block_entity);
+      $info = $block_entity->body->value;
+    }
+
     return [
       '#theme' => 'ham_neighbors',
       '#form' => $form,
       '#callsign' => $callsign,
       '#message' => $response->message,
       '#view' => $response->view,
+      '#info' => $info,
       '#attached' => [
         'library' => ['ham_station/neighbors'],
         'drupalSettings' => [
