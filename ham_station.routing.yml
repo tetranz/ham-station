@@ -13,4 +13,4 @@ ham_station.ham_neighbors:
     _title: 'Ham Neighbors'
     callsign: null
   requirements:
-    _permission: 'administer-views'
+    _permission: 'access content'
