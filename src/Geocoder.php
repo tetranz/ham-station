@@ -90,7 +90,7 @@ class Geocoder {
    *   Optional callable used to report progress.
    */
   public function geoCode(callable $callback = NULL) {
-    $google_key = $this->settings->get('google_api_key');
+    $google_key = $this->settings->get('google_geocode_api_key');
 
     if (empty($google_key)) {
       throw new \Exception('Google geocode key is not set.');

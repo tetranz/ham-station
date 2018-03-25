@@ -84,7 +84,7 @@ function ham_station_library_info_alter(&$libraries, $extension) {
 
   $api_key = \Drupal::configFactory()
     ->get('ham_station.settings')
-    ->get('google_api_key');
+    ->get('google_maps_api_key');
 
   unset($js_libs[$maps_lib_key]);
 
