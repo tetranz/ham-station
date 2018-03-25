@@ -53,7 +53,7 @@ function ham_station_theme($existing, $type, $theme, $path) {
       'variables' => [
         'form' => NULL,
         'callsign' => NULL,
-        'status' => NULL,
+        'message' => NULL,
         'view' => NULL,
       ],
     ],

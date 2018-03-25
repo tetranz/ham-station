@@ -24,7 +24,7 @@ class HamNeighborsForm extends FormBase {
     $callsign = $args[2];
 
     $form['#attributes'] = [
-      'class' => ['form-inline', 'form-search'],
+      'class' => ['form-inline', 'neighbors-form'],
     ];
 
     $form['callsign'] = [
@@ -32,7 +32,7 @@ class HamNeighborsForm extends FormBase {
       '#title' => 'Callsign',
       '#default_value' => $callsign,
       '#attributes' => [
-        'class' => ['form-group']
+        'class' => ['form-group', 'callsign-input']
       ],
     ];
 
@@ -40,7 +40,7 @@ class HamNeighborsForm extends FormBase {
       '#type' => 'submit',
       '#value' => $this->t('Find the neighbors'),
       '#attributes' => [
-        'class' => ['btn', 'btn-primary']
+        'class' => ['btn', 'btn-primary', 'submit-button']
       ],
     ];
 

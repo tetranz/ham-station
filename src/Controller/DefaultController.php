@@ -3,7 +3,8 @@
 namespace Drupal\ham_station\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\ham_station\HamNeighborsService;
+use Drupal\ham_station\Neighbors\HamNeighborsService;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DefaultController.
@@ -11,7 +12,7 @@ use Drupal\ham_station\HamNeighborsService;
 class DefaultController extends ControllerBase {
 
   /**
-   * The ham neighbors page.
+   * Ham neighbors page.
    *
    * @param string $callsign
    *   Callsign
@@ -20,10 +21,32 @@ class DefaultController extends ControllerBase {
    *   Render array
    */
   public function hamNeighbors($callsign = NULL) {
+    $callsign = strtoupper(trim($callsign));
+
     /** @var HamNeighborsService $service */
     $service = \Drupal::service('ham_station.ham_neighbors');
 
-    return $service->render(strtoupper(trim($callsign)));
+    return $service->render($callsign);
+  }
+
+  /**
+   * Ham neighbors ajax request.
+   *
+   * @param $callsign
+   *   Callsign.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   */
+  public function hamNeighborsAjax($callsign) {
+    $callsign = strtoupper(trim($callsign));
+
+    /** @var HamNeighborsService $service */
+    $service = \Drupal::service('ham_station.ham_neighbors');
+
+    return new Response(
+      $service->processSearchRequest($callsign)->responseString()
+    );
   }
 
 }

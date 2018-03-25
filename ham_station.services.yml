@@ -13,5 +13,5 @@ services:
     arguments: ['@config.factory', '@http_client', '@entity_type.manager', '@database', '@logger.channel.ham_station']
 
   ham_station.ham_neighbors:
-    class: Drupal\ham_station\HamNeighborsService
-    arguments: ['@form_builder', '@entity_type.manager']
+    class: Drupal\ham_station\Neighbors\HamNeighborsService
+    arguments: ['@form_builder', '@entity_type.manager', '@renderer']

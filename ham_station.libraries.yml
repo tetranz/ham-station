@@ -5,3 +5,4 @@ neighbors:
       type: external
   dependencies:
     - core/jquery
+    - core/jquery.once
