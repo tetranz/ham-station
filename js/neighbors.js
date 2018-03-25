@@ -25,9 +25,19 @@
 
         self.search(callsign);
       });
+
+      self.$wrapper.on("click", "a.from-here", function (e) {
+        e.preventDefault();
+        var parts = this.href.split('/');
+        var callsign = parts[parts.length - 1];
+        self.search(callsign);
+      });
     },
 
     search: function (callsign) {
+      var self = Drupal.behaviors.ham_neighbors;
+      self.$wrapper.find(".ajax-processing").removeClass('hidden').show();
+      self.$wrapper.find(".submit-button").prop('disabled', true);
       $.post("/neighbors/ajax/" + callsign, this.processResponse);
     },
 
@@ -51,14 +61,19 @@
         self.$wrapper.find(".message").text("").hide();
       }
 
+      var $title = self.$wrapper.find(".results-title");
       if (status == 1) {
         self.$wrapper.find(".map-container").show();
         self.showMap(parseFloat(info[3]), parseFloat(info[4]));
-
-        var $title = self.$wrapper.find(".results-title");
         $title.find(".callsign").html(info[1]);
         $title.show();
       }
+      else {
+        $title.hide();
+      }
+
+      self.$wrapper.find(".ajax-processing").hide();
+      self.$wrapper.find(".submit-button").prop('disabled', false);
     },
 
     showMap: function (lat, lng) {

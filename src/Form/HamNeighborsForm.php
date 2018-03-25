@@ -42,6 +42,7 @@ class HamNeighborsForm extends FormBase {
       '#attributes' => [
         'class' => ['btn', 'btn-primary', 'submit-button']
       ],
+      '#suffix' => '<span class="ajax-processing hidden"><strong>Processing...</strong></span>',
     ];
 
     return $form;
