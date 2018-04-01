@@ -81,14 +81,15 @@ class HamNeighborsService {
     // bookmarkable and means that non-Javascript users still get the list.
     $response = $this->processSearchRequest($callsign);
 
-    $info = NULL;
-    $block_entity = $this->blockContentStorage->loadByProperties([
-      'info' => 'neighbors-info'
-    ]);
+    $block_ids = $this->blockContentStorage->getQuery()
+      ->condition('info', 'neighbors-info-', 'STARTS_WITH')
+      ->execute();
 
-    if (!empty($block_entity)) {
-      $block_entity = reset($block_entity);
-      $info = $block_entity->body->value;
+    $blocks = $this->blockContentStorage->loadMultiple($block_ids);
+    $info_blocks = [];
+
+    foreach($blocks as $block) {
+      $info_blocks[substr($block->info->value, strlen('neighbors-info-'))] = $block->body->value;
     }
 
     return [
@@ -97,7 +98,7 @@ class HamNeighborsService {
       '#callsign' => $callsign,
       '#message' => $response->message,
       '#view' => $response->view,
-      '#info' => $info,
+      '#info_blocks' => $info_blocks,
       '#attached' => [
         'library' => ['ham_station/neighbors'],
         'drupalSettings' => [

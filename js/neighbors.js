@@ -67,11 +67,11 @@
         self.showMap(parseFloat(info[3]), parseFloat(info[4]));
         $title.find(".callsign").html(info[1]);
         $title.show();
-        self.$wrapper.find(".info-block").show();
+        self.$wrapper.find(".info-block-2").show();
       }
       else {
         $title.hide();
-        self.$wrapper.find(".info-block").hide();
+        self.$wrapper.find(".info-block-2").hide();
       }
 
       self.$wrapper.find(".ajax-processing").hide();

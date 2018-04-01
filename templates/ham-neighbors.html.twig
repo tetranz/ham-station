@@ -1,8 +1,7 @@
 <div class="ham-neighbors-wrapper">
-  <p>Enter your (or someone else's) callsign to see neighboring hams. <a href="/ham-neighbors-info">Click here</a> for more info.</p>
-  <p>Currently, this only has data for NH, VT, ME, MA. More states coming.</p>
+  <div class="info-block-1">{{ info_blocks[1]|raw }}</div>
   {{ form }}
-  <div class="info-block"{% if not view %} style="display: none;"{% endif %}>{{ info|raw }}</div>
+  <div class="info-block-2"{% if not view %} style="display: none;"{% endif %}>{{ info_blocks[2]|raw }}</div>
   <p class="message"{% if not message %} style="display: none;"{% endif %}>{{ message }}</p>
   <h2 class="results-title"{% if not view %} style="display: none;"{% endif %}><span class="callsign">{{ callsign }}</span> and neighbors</h2>
   <div class="map-container" style="display: none;"></div>

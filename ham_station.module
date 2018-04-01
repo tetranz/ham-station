@@ -57,7 +57,7 @@ function ham_station_theme($existing, $type, $theme, $path) {
         'callsign' => NULL,
         'message' => NULL,
         'view' => NULL,
-        'info' => NULL,
+        'info_blocks' => NULL,
       ],
     ],
   ];
