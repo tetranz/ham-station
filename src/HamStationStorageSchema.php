@@ -15,16 +15,18 @@ class HamStationStorageSchema extends SqlContentEntityStorageSchema {
    */
   protected function getSharedTableFieldSchema(FieldStorageDefinitionInterface $storage_definition, $table_name, array $column_mapping) {
     $schema = parent::getSharedTableFieldSchema($storage_definition, $table_name, $column_mapping);
+
+    $columns = [
+      'callsign' => TRUE,
+      'latitude' => FALSE,
+      'longitude' => FALSE,
+      'address_hash' => TRUE,
+    ];
+
     $field_name = $storage_definition->getName();
 
-    switch ($field_name) {
-      case 'callsign':
-        $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
-        break;
-
-      case 'address_hash':
-        $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
-        break;
+    if (isset($columns[$field_name])) {
+      $this->addSharedTableFieldIndex($storage_definition, $schema, $columns[$field_name]);
     }
 
     return $schema;
