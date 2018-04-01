@@ -1,18 +1,18 @@
 <?php
 
-namespace Drupal\ham_station\Plugin\views\argument;
+namespace Drupal\ham_station\Plugin\views\sort;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\ham_station\DistanceService;
-use Drupal\views\Plugin\views\argument\Formula;
+use Drupal\views\Plugin\views\sort\SortPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * @ingroup views_argument_handlers
+ * @ingroup views_sort_handlers
  *
- * @ViewsArgument("ham_station_distance")
+ * @ViewsSort("ham_station_distance")
  */
-class Distance extends Formula implements ContainerFactoryPluginInterface {
+class Distance extends SortPluginBase implements ContainerFactoryPluginInterface {
 
   /**
    * The distance service.
@@ -55,37 +55,8 @@ class Distance extends Formula implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
    */
-  public function query($group_by = FALSE) {
-    $this->ensureMyTable();
-    $arg_values = $this->getParsedArgument();
-    $lat = $arg_values['lat'];
-    $lng = $arg_values['lng'];
-    $radius = $arg_values['radius'];
-    $units = $arg_values['units'];
-
-    $formula = sprintf('%s AND (%s < %F)',
-      $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $this->tableAlias),
-      $this->distanceService->getDistanceFormula($lat, $lng, $units, $this->tableAlias),
-      $radius
-    );
-
-    $this->query->addWhere(0, $formula, [], 'formula');
+  public function query() {
+    $this->query->addOrderBy(NULL, NULL, $this->options['order'], 'ham_station_distance');
   }
-
-  /**
-   * Parse the pipe delimited argument.
-   *
-   * @return array
-   */
-  public function getParsedArgument() {
-    $parts = explode('|', $this->getValue());
-    
-    return [
-      'lat' => floatval($parts[0]),
-      'lng' => floatval($parts[1]),
-      'radius' => $parts[2],
-      'units' => $parts[3],
-    ];
-  }
-
+  
 }

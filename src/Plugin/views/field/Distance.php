@@ -1,18 +1,19 @@
 <?php
 
-namespace Drupal\ham_station\Plugin\views\argument;
+namespace Drupal\ham_station\Plugin\views\field;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\ham_station\DistanceService;
-use Drupal\views\Plugin\views\argument\Formula;
+use Drupal\views\Plugin\views\field\NumericField;
+use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * @ingroup views_argument_handlers
+ * @ingroup views_field_handlers
  *
- * @ViewsArgument("ham_station_distance")
+ * @ViewsField("ham_station_distance")
  */
-class Distance extends Formula implements ContainerFactoryPluginInterface {
+class Distance extends NumericField implements ContainerFactoryPluginInterface {
 
   /**
    * The distance service.
@@ -55,37 +56,22 @@ class Distance extends Formula implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
    */
-  public function query($group_by = FALSE) {
-    $this->ensureMyTable();
-    $arg_values = $this->getParsedArgument();
-    $lat = $arg_values['lat'];
-    $lng = $arg_values['lng'];
-    $radius = $arg_values['radius'];
-    $units = $arg_values['units'];
+  public function query() {
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
 
-    $formula = sprintf('%s AND (%s < %F)',
-      $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $this->tableAlias),
-      $this->distanceService->getDistanceFormula($lat, $lng, $units, $this->tableAlias),
-      $radius
-    );
-
-    $this->query->addWhere(0, $formula, [], 'formula');
+    /** @var \Drupal\ham_station\Plugin\views\argument\Distance $argument */
+    $argument = $this->view->argument['distance'];
+    $values = $argument->getParsedArgument();
+    $formula = $this->distanceService->getDistanceFormula($values['lat'], $values['lng'], $values['units'], $this->table);
+    $this->field_alias = $query->addField(NULL, $formula, substr($this->placeholder(), 1));
   }
 
   /**
-   * Parse the pipe delimited argument.
-   *
-   * @return array
+   * {@inheritdoc}
    */
-  public function getParsedArgument() {
-    $parts = explode('|', $this->getValue());
-    
-    return [
-      'lat' => floatval($parts[0]),
-      'lng' => floatval($parts[1]),
-      'radius' => $parts[2],
-      'units' => $parts[3],
-    ];
+  public function render(ResultRow $row) {
+    return parent::render($row);
   }
 
 }
