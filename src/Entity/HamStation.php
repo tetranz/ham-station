@@ -251,6 +251,10 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
       ->setRequired(FALSE);
 
     $weight++;
+
+    $fields['latitude'] = static::decimalFieldDef('Latitude', 10, 7, $weight++);
+    $fields['longitude'] = static::decimalFieldDef('Longitude', 10, 7, $weight++);
+
     $fields['total_hash'] = static::stringFieldDef('Total hash', 40, $weight++);
     $fields['address_hash'] = static::stringFieldDef('Address hash', 40, $weight++);
 
@@ -323,4 +327,29 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired($required);
   }
+
+  /**
+   * Helper to add latitude and longitude fields.
+   */
+  private static function decimalFieldDef($label, $precision, $scale, $weight) {
+    return BaseFieldDefinition::create('decimal')
+      ->setLabel(t($label))
+      ->setSettings([
+        'precision' => $precision,
+        'scale' => $scale,
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => $weight,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'textfield',
+        'weight' => $weight,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(FALSE);
+  }
+
 }
