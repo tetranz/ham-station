@@ -149,8 +149,8 @@ class HamNeighborsService {
       return $return;
     }
 
-    $return->lat = $entity->field_location->lat;
-    $return->lng = $entity->field_location->lng;
+    $return->lat = $entity->latitude->value;
+    $return->lng = $entity->longitude->value;
 
     // Looks good so generate the view render array.
     $arg = sprintf('%s|%s|100|miles', $return->lat, $return->lng);

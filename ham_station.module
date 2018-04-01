@@ -114,8 +114,8 @@ function template_preprocess_ham_station(&$variables) {
   }
 
   $variables['address'] = $variables['elements']['address'];
-  $variables['attributes']['data-lat'] = $entity->field_location->lat;
-  $variables['attributes']['data-lng'] = $entity->field_location->lng;
+  $variables['attributes']['data-lat'] = $entity->latitude->value;
+  $variables['attributes']['data-lng'] = $entity->longitude->value;
 }
 
 /**
@@ -133,7 +133,7 @@ function ham_station_views_post_execute(ViewExecutable $view) {
 
   foreach ($view->result as $row) {
     $entity = $row->_entity;
-    $latlng = sprintf('%s|%s', $entity->field_location->lat, $entity->field_location_lng);
+    $latlng = sprintf('%s|%s', $entity->latitude->value, $entity->longitude->value);
 
     if ($latlng === $prev_latlng) {
       $row->location_id = $prev_id;
