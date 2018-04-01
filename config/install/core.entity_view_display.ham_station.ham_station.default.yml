@@ -1,14 +1,14 @@
+uuid: 56983000-f8c4-493e-ad16-8c65f97f81a9
 langcode: en
 status: true
 dependencies:
-  config:
-    - field.field.ham_station.ham_station.field_location
   module:
     - address
-    - geolocation
     - ham_station
     - options
     - user
+_core:
+  default_config_hash: Y8I6GcJnDu4k73VMi8N90JtHjqORrTs6gbghGXTiVBg
 id: ham_station.ham_station.default
 targetEntityType: ham_station
 bundle: ham_station
@@ -44,13 +44,6 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-  field_location:
-    weight: 46
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: geolocation_latlng
-    region: content
   first_name:
     label: above
     type: string
@@ -59,6 +52,21 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
+  geocode_response:
+    label: above
+    type: string
+    weight: 10
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  geocode_status:
+    label: above
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
   geolocation_status:
     label: above
     weight: 9
@@ -70,6 +78,22 @@ content:
     label: above
     type: string
     weight: 3
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  latitude:
+    label: above
+    type: string
+    weight: 11
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  longitude:
+    label: above
+    type: string
+    weight: 12
     region: content
     settings:
       link_to_entity: false
