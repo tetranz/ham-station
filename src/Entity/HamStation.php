@@ -344,7 +344,7 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
         'weight' => $weight,
       ])
       ->setDisplayOptions('form', [
-        'type' => 'textfield',
+        'type' => 'string_textfield',
         'weight' => $weight,
       ])
       ->setDisplayConfigurable('form', TRUE)

@@ -153,7 +153,7 @@ class HamNeighborsService {
     $return->lng = $entity->field_location->lng;
 
     // Looks good so generate the view render array.
-    $arg = sprintf('%s,%s<100miles', $return->lat, $return->lng);
+    $arg = sprintf('%s|%s|100|miles', $return->lat, $return->lng);
     $render_array = views_embed_view('ham_neighbors', 'default', $arg);
     $return->view = $this->renderer->render($render_array);
     $return->status = self::STATUS_OK;

@@ -203,8 +203,8 @@ class Geocoder {
       switch ($status) {
         case 'OK':
           $location = $response_data['results'][0]['geometry']['location'];
-          $entity->field_location->lat = $location['lat'];
-          $entity->field_location->lng = $location['lng'];
+          $entity->latitude = $location['lat'];
+          $entity->longitude = $location['lng'];
           $entity->geocode_status = HamStation::GEOCODE_STATUS_SUCCESS;
           $success_count++;
           break;
@@ -326,8 +326,8 @@ class Geocoder {
       /** @var HamStation $other_entity */
       $other_entity = HamStation::load($row->other_id);
 
-      $other_entity->field_location->lat = $done_entity->field_location->lat;
-      $other_entity->field_location->lng = $done_entity->field_location->lng;
+      $other_entity->latitude = $done_entity->latitude;
+      $other_entity->longitude = $done_entity->longitude;
       $other_entity->geocode_response = $done_entity->geocode_response;
       $other_entity->geocode_status = $done_entity->geocode_status;
       $other_entity->save();
@@ -341,6 +341,37 @@ class Geocoder {
 
     $this->logger->info($msg);
     $this->printFeedback($msg, $callback);
+  }
+
+  /**
+   * Reload lat and lng from json response.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
+  public function reloadLatLng(callable $callback = NULL) {
+    // This is probably only used once, to load the new lat and lng base fields
+    // from the original json response.
+    $query = $this->dbConnection->select('ham_station', 'hs');
+    $query->addField('hs', 'id');
+    $query->addField('hs', 'geocode_response');
+    $query->condition('hs.geocode_status', HamStation::GEOCODE_STATUS_SUCCESS);
+    $query->isNull('latitude');
+    $query->range(0, 5000);
+    $rows = $query->execute();
+
+    $count = 0;
+    foreach ($rows as $row) {
+      $response_data = Json::decode($row->geocode_response);
+      $location = $response_data['results'][0]['geometry']['location'];
+      $entity = HamStation::load($row->id);
+      $entity->latitude = $location['lat'];
+      $entity->longitude = $location['lng'];
+      $entity->save();
+      $count++;
+    }
+
+    $this->printFeedback($count, $callback);
   }
 
   /**
