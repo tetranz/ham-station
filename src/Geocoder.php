@@ -107,13 +107,20 @@ class Geocoder {
     // Don't get stations where we have already successfully geocoded the same
     // address. We will fill these in with another query.
     $query = $this->dbConnection->select('ham_station', 'hs')
-      ->fields('hs', ['id'])
-      ->condition('hs.geocode_status', HamStation::GEOCODE_STATUS_PENDING)
+      ->fields('hs', ['id']);
+
+    $query->condition('hs.geocode_status', HamStation::GEOCODE_STATUS_PENDING)
       ->where('hs.id = (SELECT MIN(hs2.id) FROM {ham_station} hs2 WHERE hs2.address_hash = hs.address_hash)')
       ->where('NOT EXISTS (SELECT * FROM {ham_station} hs3 WHERE hs3.address_hash = hs.address_hash AND hs3.geocode_status = :success_status)', [
         ':success_status' => HamStation::GEOCODE_STATUS_SUCCESS
-      ])
-      ->range(0, $batch_size);
+      ]);
+
+    // Process states in alphabetical order.
+    $query
+      ->orderBy('hs.address__administrative_area')
+      ->orderBy('hs.callsign');
+
+    $query->range(0, $batch_size);
 
     // Using this mostly to get started with experimental queries.
     $extra_where = $this->settings->get('extra_batch_query_where');
