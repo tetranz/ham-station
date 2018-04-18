@@ -21,4 +21,4 @@ services:
 
   ham_station.report_service:
     class: Drupal\ham_station\ReportService
-    arguments: ['@database']
+    arguments: ['@database', '@cache.default']

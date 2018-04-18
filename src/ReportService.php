@@ -2,6 +2,7 @@
 
 namespace Drupal\ham_station;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Database\Connection;
 
 /**
@@ -17,12 +18,23 @@ class ReportService {
   private $dbConnection;
 
   /**
+   * The Cache
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  private $cache;
+
+  /**
    * ReportService constructor.
    *
    * @param \Drupal\Core\Database\Connection $dbConnection
+   *   The database connection.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The database connection.
    */
-  public function __construct(Connection $dbConnection) {
+  public function __construct(Connection $dbConnection, CacheBackendInterface $cache) {
     $this->dbConnection = $dbConnection;
+    $this->cache = $cache;
   }
 
   /**
@@ -32,6 +44,14 @@ class ReportService {
    *
    */
   public function geocodeStatus() {
+
+    $cache_key = 'ham_station_geocode_counts';
+    $result = $this->cache->get($cache_key);
+
+    if ($result !== FALSE) {
+      return $result->data;
+    }
+
     // Generate a geocode status report by state.
     $query = $this->dbConnection->select('ham_station', 'hs');
     $query->addField('hs', 'address__administrative_area', 'state');
@@ -74,6 +94,8 @@ class ReportService {
 
     $result['done'] = $done;
     $result['working_on'] = $working_on;
+
+    $this->cache->set($cache_key, $result, time() + 1800);
 
     return $result;
   }

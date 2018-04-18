@@ -19,13 +19,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The database connection.
-   *
-   * @var \Drupal\Core\Database\Connection
-   */
-  private $dbConnection;
-
-  /**
    * The report service.
    *
    * @var \Drupal\ham_station\ReportService
@@ -73,7 +66,7 @@ class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInte
 
     return [
       '#theme' => 'ham_neighbors_report',
-      '#states_data' => $result['states'],
+      '#state_counts' => $result['states'],
       '#totals'  => $result['totals'],
     ];
   }
