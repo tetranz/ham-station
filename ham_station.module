@@ -59,6 +59,7 @@ function ham_station_theme($existing, $type, $theme, $path) {
         'message' => NULL,
         'view' => NULL,
         'info_blocks' => NULL,
+        'report' => NULL,
       ],
     ],
   ];

@@ -14,7 +14,7 @@ services:
 
   ham_station.ham_neighbors:
     class: Drupal\ham_station\Neighbors\HamNeighborsService
-    arguments: ['@form_builder', '@entity_type.manager', '@renderer']
+    arguments: ['@form_builder', '@entity_type.manager', '@renderer', '@ham_station.report_service']
 
   ham_station.distance_service:
     class: Drupal\ham_station\DistanceService

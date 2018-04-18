@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormBuilder;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\ham_station\Entity\HamStation;
 use Drupal\ham_station\Form\HamNeighborsForm;
+use Drupal\ham_station\ReportService;
 
 /**
  * Functionality for the ham neighbors page.
@@ -49,6 +50,13 @@ class HamNeighborsService {
   private $renderer;
 
   /**
+   * The report service.
+   *
+   * @var \Drupal\ham_station\ReportService
+   */
+  private $reportService;
+
+  /**
    * HamNeighborsService constructor.
    *
    * @param \Drupal\Core\Form\FormBuilder $form_builder
@@ -57,12 +65,15 @@ class HamNeighborsService {
    *   The entity type manager.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
+   * @param \Drupal\ham_station\ReportService $report_service
+   *   The report service.
    */
-  public function __construct(FormBuilder $form_builder, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer) {
+  public function __construct(FormBuilder $form_builder, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, ReportService $reportService) {
     $this->formBuilder = $form_builder;
     $this->hamStationStorage = $entity_type_manager->getStorage('ham_station');
     $this->blockContentStorage = $entity_type_manager->getStorage('block_content');
     $this->renderer = $renderer;
+    $this->reportService = $reportService;
   }
 
   /**
@@ -99,6 +110,7 @@ class HamNeighborsService {
       '#message' => $response->message,
       '#view' => $response->view,
       '#info_blocks' => $info_blocks,
+      '#report' => $this->reportService->geocodeStatus(),
       '#attached' => [
         'library' => ['ham_station/neighbors'],
         'drupalSettings' => [
