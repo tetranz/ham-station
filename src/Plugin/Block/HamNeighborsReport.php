@@ -73,7 +73,7 @@ class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInte
 
     return [
       '#theme' => 'ham_neighbors_report',
-      '#states' => $result['states'],
+      '#states_data' => $result['states'],
       '#totals'  => $result['totals'],
     ];
   }

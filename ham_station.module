@@ -48,7 +48,7 @@ function ham_station_theme($existing, $type, $theme, $path) {
   return [
     'ham_neighbors_report' => [
       'variables' => [
-        'states' => NULL,
+        'states_data' => NULL,
         'totals' => NULL,
       ],
     ],
