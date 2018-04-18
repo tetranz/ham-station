@@ -7,7 +7,7 @@
       </tr>
       </thead>
       <tbody>
-      {% for state, values in data %}
+      {% for state, values in states %}
 
       <tr>
         <td>{{ state }}</td>
@@ -17,6 +17,14 @@
       </tr>
 
       {% endfor %}
+
+      <tr>
+        <td>Totals</td>
+        <td>{{ totals.0 }}</td>
+        <td>{{ totals.1 }}</td>
+        <td>{{ totals.2 }}</td>
+      </tr>
+
       </tbody>
     </table>
   </div>

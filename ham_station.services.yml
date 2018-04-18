@@ -18,3 +18,7 @@ services:
 
   ham_station.distance_service:
     class: Drupal\ham_station\DistanceService
+
+  ham_station.report_service:
+    class: Drupal\ham_station\ReportService
+    arguments: ['@database']
