@@ -16,9 +16,16 @@ ham_station.ham_neighbors:
     _permission: 'access content'
 
 ham_station.ham_neighbors_ajax:
-  path: '/neighbors/ajax/{callsign}'
+  path: '/neighbors-ajax/call/{callsign}'
   defaults:
     _controller: '\Drupal\ham_station\Controller\DefaultController::hamNeighborsAjax'
   requirements:
     _method: 'POST'
+    _permission: 'access content'
+
+ham_station.states_done_ajax:
+  path: '/neighbors-ajax/states-done-ajax'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::statesDoneAjax'
+  requirements:
     _permission: 'access content'

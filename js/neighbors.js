@@ -32,13 +32,15 @@
         var callsign = parts[parts.length - 1];
         self.search(callsign);
       });
+
+      self.updateStatesDone();
     },
 
     search: function (callsign) {
       var self = Drupal.behaviors.ham_neighbors;
       self.$wrapper.find(".ajax-processing").removeClass('hidden').show();
       self.$wrapper.find(".submit-button").prop('disabled', true);
-      $.post("/neighbors/ajax/" + callsign, this.processResponse);
+      $.post("/neighbors-ajax/call/" + callsign, this.processResponse);
     },
 
     processResponse: function (data) {
@@ -158,6 +160,31 @@
       }
 
       self.$wrapper.find('.map-container').show();
+    },
+
+    updateStatesDone: function () {
+      // Use ajax for this so we can cache the page.
+      var self = Drupal.behaviors.ham_neighbors;
+
+      var $done_element = self.$wrapper.find(".states-done");
+      var $working_on_element = self.$wrapper.find(".states-working");
+
+      if (!$done_element.length && !$working_on_element.length) {
+        return;
+      }
+
+      $.ajax({
+        url: "/neighbors-ajax/states-done-ajax"
+      })
+        .done(function (data) {
+          if ($done_element.length) {
+            $done_element.html(data.done.join(", "));
+          }
+
+          if ($working_on_element.length) {
+            $working_on_element.html(data.working_on);
+          }
+      });
     }
 
   };

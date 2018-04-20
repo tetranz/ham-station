@@ -2,6 +2,7 @@
 
 namespace Drupal\ham_station\Controller;
 
+use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\ham_station\Neighbors\HamNeighborsService;
 use Symfony\Component\HttpFoundation\Response;
@@ -49,4 +50,15 @@ class DefaultController extends ControllerBase {
     );
   }
 
+  public function statesDoneAjax() {
+    /** @var \Drupal\ham_station\ReportService $reportService */
+    $reportService = \Drupal::service('ham_station.report_service');
+
+    $result = $reportService->geocodeStatus();
+    
+    return new AjaxResponse([
+      'done' => $result['done'],
+      'working_on' => $result['working_on'],
+    ]);
+  }
 }
