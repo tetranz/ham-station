@@ -30,7 +30,7 @@ class ReportService {
    * @param \Drupal\Core\Database\Connection $dbConnection
    *   The database connection.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
-   *   The database connection.
+   *   The cache.
    */
   public function __construct(Connection $dbConnection, CacheBackendInterface $cache) {
     $this->dbConnection = $dbConnection;
@@ -95,7 +95,7 @@ class ReportService {
     $result['done'] = $done;
     $result['working_on'] = $working_on;
 
-    $this->cache->set($cache_key, $result, time() + 1800);
+    $this->cache->set($cache_key, $result, time() + 86400);
 
     return $result;
   }

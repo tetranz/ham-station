@@ -3,6 +3,7 @@
 namespace Drupal\ham_station;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -56,6 +57,13 @@ class Geocoder {
   private $dbConnection;
 
   /**
+   * The Cache
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  private $cache;
+
+  /**
    * Geocoder constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
@@ -68,19 +76,23 @@ class Geocoder {
    *   The database connection.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The cache.
    */
   public function __construct(
     ConfigFactory $config_factory,
     ClientInterface $http_client,
     EntityTypeManagerInterface $entity_type_manager,
     Connection $db_connection,
-    LoggerInterface $logger
+    LoggerInterface $logger,
+    CacheBackendInterface $cache
   ) {
     $this->settings = $config_factory->get('ham_station.settings');
     $this->httpClient = $http_client;
     $this->hamStationStorage = $entity_type_manager->getStorage('ham_station');
     $this->dbConnection = $db_connection;
     $this->logger = $logger;
+    $this->cache = $cache;
   }
 
   /**
@@ -252,6 +264,9 @@ class Geocoder {
 
     $this->logger->info($msg);
     $this->printFeedback($msg, $callback);
+
+    // Invalidate cached counts.
+    $this->cache->invalidate('ham_station_geocode_counts');
   }
 
   /**

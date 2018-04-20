@@ -110,7 +110,6 @@ class HamNeighborsService {
       '#message' => $response->message,
       '#view' => $response->view,
       '#info_blocks' => $info_blocks,
-      '#report' => $this->reportService->geocodeStatus(),
       '#attached' => [
         'library' => ['ham_station/neighbors'],
         'drupalSettings' => [
