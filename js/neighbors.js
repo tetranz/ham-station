@@ -34,6 +34,7 @@
       });
 
       self.updateStatesDone();
+      self.updateGeocodeReport();
     },
 
     search: function (callsign) {
@@ -184,6 +185,23 @@
           if ($working_on_element.length) {
             $working_on_element.html(data.working_on);
           }
+      });
+    },
+
+    updateGeocodeReport: function () {
+      // Use ajax for this so we can cache the page.
+      var self = Drupal.behaviors.ham_neighbors;
+      var $report_element = $(".ham-neighbors-geocode-report");
+
+      if (!$report_element.length) {
+        return;
+      }
+
+      $.ajax({
+        url: "/neighbors-ajax/geocode-report-ajax"
+      })
+        .done(function (data) {
+          $report_element.html(data);
       });
     }
 

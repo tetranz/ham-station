@@ -61,13 +61,17 @@ class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function build() {
-
-    $result = $this->reportService->geocodeStatus();
-
+    // Report content is requested via ajax so we can use the anonymous page cache.
     return [
-      '#theme' => 'ham_neighbors_report',
-      '#state_counts' => $result['states'],
-      '#totals'  => $result['totals'],
+      '#markup' => '<div class="ham-neighbors-geocode-report"></div>',
+      '#attached' => [
+        'library' => ['ham_station/neighbors'],
+        'drupalSettings' => [
+          'ham_neighbors' => [
+            'status' => 0,
+          ],
+        ],
+      ],
     ];
   }
 
