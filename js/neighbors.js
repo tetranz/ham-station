@@ -185,6 +185,8 @@
           if ($working_on_element.length) {
             $working_on_element.html(data.working_on);
           }
+
+          self.$wrapper.find(".states-info").removeClass("hidden");
       });
     },
 

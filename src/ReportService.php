@@ -95,7 +95,8 @@ class ReportService {
     $result['done'] = $done;
     $result['working_on'] = $working_on;
 
-    $this->cache->set($cache_key, $result, time() + 86400);
+    // Cache is invalidated when geocoding happens.
+    $this->cache->set($cache_key, $result);
 
     return $result;
   }
