@@ -94,6 +94,7 @@ class ReportService {
 
     $result['done'] = $done;
     $result['working_on'] = $working_on;
+    $result['success_pc'] = 100 * $totals[1] / ($totals[1] + $totals[2]);
 
     // Cache is invalidated when geocoding happens.
     $this->cache->set($cache_key, $result);

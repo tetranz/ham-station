@@ -89,6 +89,7 @@ class DefaultController extends ControllerBase {
       '#theme' => 'ham_neighbors_report',
       '#state_counts' => $result['states'],
       '#totals'  => $result['totals'],
+      '#success_pc' => $result['success_pc'],
     ];
 
     /** @var Renderer $renderer */

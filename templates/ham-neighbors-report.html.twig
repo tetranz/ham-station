@@ -19,13 +19,15 @@
       {% endfor %}
 
       <tr>
-        <td>Totals</td>
-        <td>{{ totals.0 }}</td>
-        <td>{{ totals.1 }}</td>
-        <td>{{ totals.2 }}</td>
+        <td><strong>Totals</strong></td>
+        <td><strong>{{ totals.0 }}</strong></td>
+        <td><strong>{{ totals.1 }}</strong></td>
+        <td><strong>{{ totals.2 }}</strong></td>
       </tr>
 
       </tbody>
     </table>
+
+    <p>Success rate: {{ '%.1f %%'|format(success_pc) }}</p>
   </div>
 </div>
