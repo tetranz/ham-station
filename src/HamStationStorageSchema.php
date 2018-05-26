@@ -2,6 +2,7 @@
 
 namespace Drupal\ham_station;
 
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
@@ -9,6 +10,19 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  * Defines the ham_station schema handler.
  */
 class HamStationStorageSchema extends SqlContentEntityStorageSchema {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEntitySchema(ContentEntityTypeInterface $entity_type, $reset = FALSE) {
+    $schema = parent::getEntitySchema($entity_type, $reset);
+
+    $schema['ham_station']['indexes'] += [
+        'ham_station_state_geocode_status' => ['address__administrative_area', 'geocode_status'],
+    ];
+
+    return $schema;
+  }
 
   /**
    * {@inheritdoc}
