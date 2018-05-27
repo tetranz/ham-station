@@ -17,9 +17,15 @@ class HamStationStorageSchema extends SqlContentEntityStorageSchema {
   protected function getEntitySchema(ContentEntityTypeInterface $entity_type, $reset = FALSE) {
     $schema = parent::getEntitySchema($entity_type, $reset);
 
-    $schema['ham_station']['indexes'] += [
-        'ham_station_state_geocode_status' => ['address__administrative_area', 'geocode_status'],
-    ];
+    // This index would be used to speed up the progress report. Unfortunately
+    // the Drupal code restricts the index length to 191. Although this has no
+    // real effect on the index because these two fields are much smaller than
+    // that, it seems to prevent the index being used in the GROUP BY query.
+    // Therefore commenting this out and creating the index manually.
+
+    // $schema['ham_station']['indexes'] += [
+    //    'ham_station_state_geocode_status' => ['address__administrative_area', 'geocode_status'],
+    // ];
 
     return $schema;
   }
