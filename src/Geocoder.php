@@ -361,6 +361,7 @@ class Geocoder {
 
       $other_entity->latitude = $done_entity->latitude;
       $other_entity->longitude = $done_entity->longitude;
+      $other_entity->grid_square = $done_entity->grid_square;
       $other_entity->geocode_response = $done_entity->geocode_response;
       $other_entity->geocode_status = $done_entity->geocode_status;
       $other_entity->save();
