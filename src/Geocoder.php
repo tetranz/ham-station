@@ -64,6 +64,13 @@ class Geocoder {
   private $cache;
 
   /**
+   * The grid square service
+   *
+   * @var \Drupal\ham_station\GridService $grid_service
+   */
+  private $gridService;
+
+  /**
    * Geocoder constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
@@ -78,6 +85,8 @@ class Geocoder {
    *   The logger.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   The cache.
+   * @param \Drupal\ham_station\GridService $grid_service
+   *   The grid square service.
    */
   public function __construct(
     ConfigFactory $config_factory,
@@ -85,7 +94,8 @@ class Geocoder {
     EntityTypeManagerInterface $entity_type_manager,
     Connection $db_connection,
     LoggerInterface $logger,
-    CacheBackendInterface $cache
+    CacheBackendInterface $cache,
+    GridService $grid_service
   ) {
     $this->settings = $config_factory->get('ham_station.settings');
     $this->httpClient = $http_client;
@@ -93,6 +103,7 @@ class Geocoder {
     $this->dbConnection = $db_connection;
     $this->logger = $logger;
     $this->cache = $cache;
+    $this->gridService = $grid_service;
   }
 
   /**
@@ -223,6 +234,7 @@ class Geocoder {
           $location = $response_data['results'][0]['geometry']['location'];
           $entity->latitude = $location['lat'];
           $entity->longitude = $location['lng'];
+          $entity->grid_square = $this->gridService->calculateGridSquare($location['lat'], $location['lng']);
           $entity->geocode_status = HamStation::GEOCODE_STATUS_SUCCESS;
           $success_count++;
           break;
