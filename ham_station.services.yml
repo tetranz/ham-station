@@ -22,3 +22,6 @@ services:
   ham_station.report_service:
     class: Drupal\ham_station\ReportService
     arguments: ['@database', '@cache.default']
+
+  ham_station.grid_service:
+    class: Drupal\ham_station\GridService
