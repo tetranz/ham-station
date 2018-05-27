@@ -129,8 +129,7 @@ class Geocoder {
 
     // Process states in alphabetical order.
     $query
-      ->orderBy('hs.address__administrative_area')
-      ->orderBy('hs.callsign');
+      ->orderBy('hs.address__administrative_area');
 
     $query->range(0, $batch_size);
 
