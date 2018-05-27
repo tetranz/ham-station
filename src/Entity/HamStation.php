@@ -254,6 +254,7 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
 
     $fields['latitude'] = static::decimalFieldDef('Latitude', 10, 7, $weight++);
     $fields['longitude'] = static::decimalFieldDef('Longitude', 10, 7, $weight++);
+    $fields['grid_square'] = static::stringFieldDef('Grid Square', 6, $weight++);
 
     $fields['total_hash'] = static::stringFieldDef('Total hash', 40, $weight++);
     $fields['address_hash'] = static::stringFieldDef('Address hash', 40, $weight++);
