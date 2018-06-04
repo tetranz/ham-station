@@ -21,7 +21,7 @@ class HamNeighborsForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $args = func_get_args();
-    $callsign = $args[2];
+    $query = $args[2];
 
     $form['#attributes'] = [
       'class' => ['form-inline', 'neighbors-form'],
@@ -29,8 +29,8 @@ class HamNeighborsForm extends FormBase {
 
     $form['callsign'] = [
       '#type' => 'textfield',
-      '#title' => 'Callsign',
-      '#default_value' => $callsign,
+      '#title' => 'Callsign or Gridsquare',
+      '#default_value' => $query,
       '#attributes' => [
         'class' => ['form-group', 'callsign-input']
       ],

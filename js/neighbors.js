@@ -5,6 +5,7 @@
     markers: [],
     infowindows: [],
     active_infowindow: null,
+    rectangle: null,
 
     attach: function (context, settings) {
       var self = Drupal.behaviors.ham_neighbors;
@@ -12,7 +13,15 @@
       self.$wrapper = $(".ham-neighbors-wrapper");
 
       if (mysettings.status == 1) {
-        self.showMap(parseFloat(mysettings.lat), parseFloat(mysettings.lng));
+        self.showMap(
+            mysettings.query_type,
+            parseFloat(mysettings.lat),
+            parseFloat(mysettings.lng),
+            parseFloat(mysettings.north),
+            parseFloat(mysettings.south),
+            parseFloat(mysettings.east),
+            parseFloat(mysettings.west)
+        );
       }
 
       self.$wrapper.find(".submit-button").once("click").click(function (e) {
@@ -48,16 +57,16 @@
       var self = Drupal.behaviors.ham_neighbors;
       var delim = data.indexOf("$");
       var info = data.substr(0, delim).split("|");
-      var status = info[0];
-      var callsign = info[1];
+      var status = info[1];
+      var query = info[2];
 
       // This makes it bookmarkable.
-      window.history.pushState({}, null, "/neighbors/" + callsign);
+      window.history.pushState({}, null, "/neighbors/" + query);
 
       self.$wrapper.find(".view-container").html(data.substr(delim + 1));
 
       if (status > 1) {
-        self.$wrapper.find(".message").text(info[2]).show();
+        self.$wrapper.find(".message").text(info[3]).show();
         self.$wrapper.find(".map-container").hide();
       }
       else {
@@ -67,8 +76,24 @@
       var $title = self.$wrapper.find(".results-title");
       if (status == 1) {
         self.$wrapper.find(".map-container").show();
-        self.showMap(parseFloat(info[3]), parseFloat(info[4]));
-        $title.find(".callsign").html(info[1]);
+        self.showMap(
+            info[0],
+            parseFloat(info[4]),
+            parseFloat(info[5]),
+            parseFloat(info[7]),
+            parseFloat(info[8]),
+            parseFloat(info[9]),
+            parseFloat(info[10])
+        );
+        var query_text;
+        if (info[0] == 0) {
+          query_text = "Callsign " + query;
+        }
+        else {
+          query_text = "Gridsquare " + query;
+        }
+
+        $title.find(".callsign").html(query_text);
         $title.show();
         self.$wrapper.find(".info-block-2").show();
       }
@@ -81,18 +106,20 @@
       self.$wrapper.find(".submit-button").prop('disabled', false);
     },
 
-    showMap: function (lat, lng) {
+    showMap: function (query_type, lat, lng, north, south, east, west) {
       var self = Drupal.behaviors.ham_neighbors;
 
       // Center the map on the closest store.
       var center = {lat: lat, lng: lng};
       var map_container = document.getElementsByClassName("map-container")[0];
       var tmp_id;
+      // If it's a gridsquare query, zoom out to see rectangle.
+      var zoom = query_type == 0 ? 15 : 13;
 
       if (!self.map) {
         // Build map for the first time.
         self.map = new google.maps.Map(map_container, {
-          zoom: 15,
+          zoom: zoom,
           center: center
         });
       }
@@ -104,9 +131,31 @@
 
         // Recenter existing map.
         self.map.setCenter(center);
+        self.map.setZoom(zoom);
 
         self.markers = [];
         self.infowindows = [];
+        if (self.rectangle) {
+          self.rectangle.setMap(null);
+          self.rectangle = null;
+        }
+      }
+
+      // Show rectangle for gridsquare.
+      if (query_type == 1) {
+        self.rectangle = new google.maps.Rectangle({
+          strokeColor: '#444444',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillOpacity: 0,
+          map: self.map,
+          bounds: {
+            north: north,
+            south: south,
+            east: east,
+            west: west
+          }
+        });
       }
 
       self.$wrapper.find(".view-container .ham-station").each(function (index) {

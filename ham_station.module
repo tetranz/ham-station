@@ -56,7 +56,8 @@ function ham_station_theme($existing, $type, $theme, $path) {
     'ham_neighbors' => [
       'variables' => [
         'form' => NULL,
-        'callsign' => NULL,
+        'query_type' => NULL,
+        'query' => NULL,
         'message' => NULL,
         'view' => NULL,
         'info_blocks' => NULL,
@@ -114,7 +115,7 @@ function template_preprocess_ham_station(&$variables) {
   } else {
     $variables['name'] = $entity->organization->value;
   }
-
+  
   $variables['address'] = $variables['elements']['address'];
   $variables['attributes']['data-lat'] = $entity->latitude->value;
   $variables['attributes']['data-lng'] = $entity->longitude->value;
@@ -124,14 +125,18 @@ function template_preprocess_ham_station(&$variables) {
  * Implements hook_views_post_execute();
  */
 function ham_station_views_post_execute(ViewExecutable $view) {
-  if (!($view->id() === 'ham_neighbors' && $view->current_display === 'default')) {
+  if (!($view->id() === 'ham_neighbors' && $view->current_display === 'dist_from_point')) {
     return;
   }
+
+  /** @var \Drupal\ham_station\GridSquares\Calculator $calculator */
+  $calculator = \Drupal::service('ham_station.grid_calculator');
 
   // Set a location_id property on rows which have the same location as a
   // previous row. This helps us have a single map marker per location.  
   $prev_latlng = NULL;
   $prev_id = NULL;
+  $gridsquare = NULL;
 
   foreach ($view->result as $row) {
     $entity = $row->_entity;
@@ -143,6 +148,9 @@ function ham_station_views_post_execute(ViewExecutable $view) {
     else {
       $prev_id = $row->id;
       $prev_latlng = $latlng;
+      $gridsquare = $calculator->latLngToSubSquare($entity->latitude->value, $entity->longitude->value);
     }
+
+    $row->gridsquare = $gridsquare;
   }
 }

@@ -19,5 +19,13 @@ function ham_station_views_data_alter(&$data) {
     ],
   ];
 
+  $data['ham_station']['rectangle'] = [
+    'title' => t('Rectangle'),
+    'help' => t('A rectangle defined by latitude and longitude.'),
+    'argument' => [
+      'id' => 'ham_station_rectangle',
+    ],
+  ];
+
   return $data;
 }

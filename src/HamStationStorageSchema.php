@@ -40,7 +40,6 @@ class HamStationStorageSchema extends SqlContentEntityStorageSchema {
       'callsign' => TRUE,
       'latitude' => FALSE,
       'longitude' => FALSE,
-      'grid_square' => FALSE,
       'address_hash' => TRUE,
     ];
 

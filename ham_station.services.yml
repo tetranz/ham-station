@@ -17,11 +17,15 @@ services:
       - '@database'
       - '@logger.channel.ham_station'
       - '@cache.default'
-      - '@ham_station.grid_service'
 
   ham_station.ham_neighbors:
     class: Drupal\ham_station\Neighbors\HamNeighborsService
-    arguments: ['@form_builder', '@entity_type.manager', '@renderer', '@ham_station.report_service']
+    arguments:
+      - '@form_builder'
+      - '@entity_type.manager'
+      - '@renderer'
+      - '@ham_station.report_service'
+      - '@ham_station.grid_calculator'
 
   ham_station.distance_service:
     class: Drupal\ham_station\DistanceService
@@ -30,5 +34,5 @@ services:
     class: Drupal\ham_station\ReportService
     arguments: ['@database', '@cache.default']
 
-  ham_station.grid_service:
-    class: Drupal\ham_station\GridService
+  ham_station.grid_calculator:
+    class: Drupal\ham_station\GridSquares\Calculator
