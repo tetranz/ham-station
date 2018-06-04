@@ -60,8 +60,8 @@ class Distance extends NumericField implements ContainerFactoryPluginInterface {
     /** @var \Drupal\views\Plugin\views\query\Sql $query */
     $query = $this->query;
 
-    /** @var \Drupal\ham_station\Plugin\views\argument\Distance $argument */
-    $argument = $this->view->argument['distance'];
+    /** @var \Drupal\ham_station\Plugin\views\argument\ArgInterface $argument */
+    $argument = reset($this->view->argument);
     $values = $argument->getParsedArgument();
     $formula = $this->distanceService->getDistanceFormula($values['lat'], $values['lng'], $values['units'], $this->table);
     $this->field_alias = $query->addField(NULL, $formula, substr($this->placeholder(), 1));

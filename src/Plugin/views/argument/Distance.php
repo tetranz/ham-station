@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ViewsArgument("ham_station_distance")
  */
-class Distance extends Formula implements ContainerFactoryPluginInterface {
+class Distance extends Formula implements ContainerFactoryPluginInterface, ArgInterface {
 
   /**
    * The distance service.
