@@ -2,7 +2,6 @@
 
 namespace Drupal\ham_station\Commands;
 
-use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\ham_station\Geocoder;
 use Drupal\ham_station\Importers\FccImporter;
 use Drush\Commands\DrushCommands;
