@@ -114,7 +114,7 @@
       var map_container = document.getElementsByClassName("map-container")[0];
       var tmp_id;
       // If it's a gridsquare query, zoom out to see rectangle.
-      var zoom = query_type == 0 ? 15 : 13;
+      var zoom = query_type == 0 ? 15 : 14;
 
       if (!self.map) {
         // Build map for the first time.
