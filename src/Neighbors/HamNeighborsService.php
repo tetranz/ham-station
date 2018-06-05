@@ -223,8 +223,14 @@ class HamNeighborsService {
     $return->gridEast = $gridSquare->getLngEast();
     $return->gridWest = $gridSquare->getLngWest();
 
-    $arg = sprintf('%s|%s|25|miles', $return->lat, $return->lng);
-    $render_array = views_embed_view('ham_neighbors', 'dist_from_point', $arg);
+    $arg = sprintf('%s|%s|%s|%s|25|miles',
+      $gridSquare->getLatSouth(),
+      $gridSquare->getLngWest(),
+      $gridSquare->getLatNorth(),
+      $gridSquare->getLngEast()
+    );
+
+    $render_array = views_embed_view('ham_neighbors', 'rectangle', $arg);
     $return->view = $this->renderer->render($render_array);
     $return->status = self::STATUS_OK;
 
