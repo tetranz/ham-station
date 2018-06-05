@@ -125,7 +125,8 @@ function template_preprocess_ham_station(&$variables) {
  * Implements hook_views_post_execute();
  */
 function ham_station_views_post_execute(ViewExecutable $view) {
-  if (!($view->id() === 'ham_neighbors' && $view->current_display === 'dist_from_point')) {
+  if (!($view->id() === 'ham_neighbors'
+    && in_array($view->current_display, ['dist_from_point', 'rectangle']))) {
     return;
   }
 
