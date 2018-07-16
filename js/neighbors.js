@@ -6,11 +6,16 @@
     infowindows: [],
     active_infowindow: null,
     rectangle: null,
+    autocomplete: null,
 
     attach: function (context, settings) {
       var self = Drupal.behaviors.ham_neighbors;
       var mysettings = settings.ham_neighbors;
       self.$wrapper = $(".ham-neighbors-wrapper");
+
+      $("#edit-query-type-c").prop("checked", true);
+
+      self.setup();
 
       if (mysettings.status == 1) {
         self.showMap(
@@ -44,6 +49,52 @@
 
       self.updateStatesDone();
       self.updateGeocodeReport();
+    },
+
+    setup: function () {
+      var self = Drupal.behaviors.ham_neighbors;
+
+      $(".form-item-query-type .form-radio").change(function () {
+        self.selectInputType(this.value);
+      });
+    },
+
+    selectInputType: function (input_type) {
+      var self = Drupal.behaviors.ham_neighbors;
+
+      var text_list = {
+        "c": ["Callsign", "Enter a callsign"],
+        "g": ["Grid square", "Enter a 6 character grid square."],
+        "m": ["Latitude and Longitude", "Enter two decimal numbers separated with a comma."]
+      };
+
+      if (input_type in text_list) {
+        self.$wrapper.find(".form-item-query label").text(text_list[input_type][0]);
+        self.$wrapper.find(".form-item-query .description").text(text_list[input_type][1]);
+      }
+
+      if (input_type == 'a') {
+        if (!self.autocomplete) {
+          self.autocomplete = new google.maps.places.Autocomplete(
+              document.getElementById('edit-address'),
+              {types: ['geocode'], fields: ['geometry.location']});
+
+          self.autocomplete.addListener('place_changed', self.placeChanged);
+        }
+
+        $(".form-item-query").hide();
+        $(".form-item-address").show();
+      }
+      else {
+        $(".form-item-query").show();
+        $(".form-item-address").hide();
+      }
+    },
+
+    placeChanged: function () {
+      var self = Drupal.behaviors.ham_neighbors;
+      var location = self.autocomplete.getPlace().geometry.location;
+      console.log(location.lat(), location.lng());
     },
 
     search: function (callsign) {

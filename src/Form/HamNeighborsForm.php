@@ -20,27 +20,44 @@ class HamNeighborsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $args = func_get_args();
-    $query = $args[2];
+  //  $args = func_get_args();
+  //  $query = $args[2];
 
-    $form['#attributes'] = [
-      'class' => ['form-inline', 'neighbors-form'],
+  //  $form['#attributes'] = [
+  //    'class' => [ 'neighbors-form'],
+  //  ];
+
+    $form['query_type'] = [
+      '#type' => 'radios',
+      '#options' => [
+        'c' => $this->t('Callsign'),
+        'g' => $this->t('Gridsquare'),
+        'a' => $this->t('Street address'),
+        'm' => $this->t('Latitude and longitude'),
+      ],
     ];
 
-    $form['callsign'] = [
+    $form['query'] = [
       '#type' => 'textfield',
-      '#title' => 'Callsign or Gridsquare',
-      '#default_value' => $query,
-      '#attributes' => [
-        'class' => ['form-group', 'callsign-input']
+      '#title' => $this->t('Callsign'),
+      '#description' => $this->t('Enter a callsign'),
+   //   '#default_value' => $query,
+    ];
+
+    $form['address'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Street address'),
+      '#description' => $this->t('Start typing a street address and choose from the dropdown.'),
+      '#wrapper_attributes' => [
+        'style' => 'display:none',
       ],
     ];
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Find the neighbors'),
+      '#value' => $this->t('Search'),
       '#attributes' => [
-        'class' => ['btn', 'btn-primary', 'submit-button']
+        'class' => ['btn', 'btn-primary']
       ],
       '#suffix' => '<span class="ajax-processing hidden"><strong>Processing...</strong></span>',
     ];
