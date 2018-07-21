@@ -6,6 +6,16 @@ ham_station.config:
   requirements:
     _permission: 'administer site configuration'
 
+ham_station.search:
+  path: '/hamsearch/{query_type}/{query}'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::search'
+    _title: 'Search'
+    query_type: null
+    query: null
+  requirements:
+    _permission: 'access content'
+
 ham_station.ham_neighbors:
   path: '/neighbors/{callsign}'
   defaults:

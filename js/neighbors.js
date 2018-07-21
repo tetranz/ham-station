@@ -7,6 +7,7 @@
     active_infowindow: null,
     rectangle: null,
     autocomplete: null,
+    place_location: null,
 
     attach: function (context, settings) {
       var self = Drupal.behaviors.ham_neighbors;
@@ -29,15 +30,23 @@
         );
       }
 
-      self.$wrapper.find(".submit-button").once("click").click(function (e) {
+      self.$wrapper.find("#edit-submit").once("click").click(function (e) {
         e.preventDefault();
-        var callsign = self.$wrapper.find(".callsign-input").val().trim();
-
-        if (!callsign) {
-          return;
+        var query;
+        var query_type = $(".form-item-query-type .form-radio:checked").val();
+        if (query_type == 'a') {
+          if (!self.autocomplete || !self.place_location) {
+            return;
+          }
+        }
+        else {
+          query = $("#edit-query").val().trim();
+          if (!query) {
+            return;
+          }
         }
 
-        self.search(callsign);
+        console.log(query_type, query, self.place_location);
       });
 
       self.$wrapper.on("click", "a.from-here", function (e) {
@@ -49,6 +58,15 @@
 
       self.updateStatesDone();
       self.updateGeocodeReport();
+    },
+
+    search: function () {
+      var callsign = self.$wrapper.find(".callsign-input").val().trim();
+
+      if (!callsign) {
+        return;
+      }
+
     },
 
     setup: function () {
@@ -93,11 +111,10 @@
 
     placeChanged: function () {
       var self = Drupal.behaviors.ham_neighbors;
-      var location = self.autocomplete.getPlace().geometry.location;
-      console.log(location.lat(), location.lng());
+      self.place_location = self.autocomplete.getPlace().geometry.location;
     },
 
-    search: function (callsign) {
+    xsearch: function (callsign) {
       var self = Drupal.behaviors.ham_neighbors;
       self.$wrapper.find(".ajax-processing").removeClass('hidden').show();
       self.$wrapper.find(".submit-button").prop('disabled', true);

@@ -13,6 +13,19 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class DefaultController extends ControllerBase {
 
+  public function search($query_type, $query) {
+    $query = strtoupper(trim($query));
+
+    /** @var HamNeighborsService $service */
+    $service = \Drupal::service('ham_station.ham_neighbors');
+
+    return $service->render($query);
+  }
+
+  public function searchAjax($query_type, $query) {
+
+  }
+
   /**
    * Ham neighbors page.
    *
@@ -70,7 +83,6 @@ class DefaultController extends ControllerBase {
       'working_on' => $result['working_on'],
     ]);
   }
-
 
   /**
    * Get the geocode status report.
