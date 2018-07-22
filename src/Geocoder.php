@@ -263,7 +263,7 @@ class Geocoder {
     }
 
     $entity->latitude = $best_result['location']['lat'];
-    $entity->longitude = $best_result['location']['lat'];
+    $entity->longitude = $best_result['location']['lng'];
     $entity->geocode_status = HamStation::GEOCODE_STATUS_SUCCESS;
 
     return TRUE;
