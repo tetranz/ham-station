@@ -308,6 +308,7 @@ class Geocoder {
       $other_entity->longitude = $done_entity->longitude;
       $other_entity->geocode_response = $done_entity->geocode_response;
       $other_entity->geocode_status = $done_entity->geocode_status;
+      $other_entity->geocode_provider = $done_entity->geocode_provider;
       $other_entity->save();
       $update_count++;
     }
