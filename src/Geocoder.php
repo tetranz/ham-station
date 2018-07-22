@@ -167,7 +167,7 @@ class Geocoder {
 
     do {
       $response = NULL;
-      $request_success = TRUE;
+      $request_success = FALSE;
 
       try {
         // Geocodio batch request.
@@ -175,13 +175,19 @@ class Geocoder {
           'json' => $request_data,
           'query' => ['api_key' => $geocodio_key],
         ]);
+        $request_success = TRUE;
       }
       catch (GuzzleException $ex) {
-        $request_success = FALSE;
         $this->logger->warning(sprintf(
           "Http exception calling Geocodio %s",
           $ex->getMessage()
         ));
+
+        // 403 almost certainly means that we're over the free daily limit.
+        // Don't bother retrying.
+        if ($ex->getCode() === 403) {
+          $error_403 = TRUE;
+        }
       }
 
       if ($request_success && $response->getStatusCode() != 200) {
@@ -190,12 +196,6 @@ class Geocoder {
           'Status code %s from Geocodio',
           $response->getStatusCode()
         ));
-
-        // 403 almost certainly means that we're over the free daily limit.
-        // Don't bother retrying.
-        if ($response->getStatusCode() === 403) {
-          $error_403 = TRUE;
-        }
       }
 
     } while (!$request_success && !$error_403 && ++$retries < static::GEOCODE_MAX_RETRIES);
