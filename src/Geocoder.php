@@ -162,7 +162,8 @@ class Geocoder {
       ];
     }
 
-    $retries = 0;
+    $retries = 3;
+    $error_403 = FALSE;
 
     do {
       $response = NULL;
@@ -189,9 +190,19 @@ class Geocoder {
           'Status code %s from Geocodio',
           $response->getStatusCode()
         ));
+
+        // 403 almost certainly means that we're over the free daily limit.
+        // Don't bother retrying.
+        if ($response->getStatusCode() === 403) {
+          $error_403 = TRUE;
+        }
       }
 
-    } while (!$request_success && ++$retries < static::GEOCODE_MAX_RETRIES);
+    } while (!$request_success && !$error_403 && ++$retries < static::GEOCODE_MAX_RETRIES);
+
+    if ($error_403) {
+      return;
+    }
 
     if (!$request_success) {
       $msg = sprintf('Excessive http errors calling Geocodio');
