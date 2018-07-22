@@ -215,6 +215,10 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $weight++;
+
+    $fields['geocode_provider'] = static::stringFieldDef('Geocode provider', 2, $weight++);
+
     $fields['geocode_status'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Geocode status'))
       ->setSetting('allowed_values', [

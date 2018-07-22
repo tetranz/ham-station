@@ -47,6 +47,13 @@ class HamStationConfigForm extends ConfigFormBase {
       '#default_value' => $config->get($key),
     ];
 
+    $key = 'geocodio_api_key';
+    $form[$key] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Geocodio API key'),
+      '#default_value' => $config->get($key),
+    ];
+
     $key = 'geocode_cron_enable';
     $form[$key] = [
       '#type' => 'checkbox',
@@ -83,6 +90,7 @@ class HamStationConfigForm extends ConfigFormBase {
     $keys = [
       'google_geocode_api_key',
       'google_maps_api_key',
+      'geocodio_api_key',
       'geocode_batch_size',
       'geocode_cron_enable',
       'extra_batch_query_where'
