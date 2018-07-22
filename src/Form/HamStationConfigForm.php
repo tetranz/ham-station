@@ -33,13 +33,6 @@ class HamStationConfigForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('ham_station.settings');
 
-    $key = 'google_geocode_api_key';
-    $form[$key] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Google Geocode API key'),
-      '#default_value' => $config->get($key),
-    ];
-
     $key = 'google_maps_api_key';
     $form[$key] = [
       '#type' => 'textfield',
@@ -88,7 +81,6 @@ class HamStationConfigForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('ham_station.settings');
     $keys = [
-      'google_geocode_api_key',
       'google_maps_api_key',
       'geocodio_api_key',
       'geocode_batch_size',
