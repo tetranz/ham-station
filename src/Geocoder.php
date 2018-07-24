@@ -220,7 +220,7 @@ class Geocoder {
     $not_found_count = 0;
 
     // Anything else is effectively "not found".
-    $ok_accuracy_types = ['rooftop', 'point', 'range_interpolation'];
+    $ok_accuracy_types = ['rooftop', 'point', 'range_interpolation', 'street_center'];
 
     foreach ($entities as $idx => $entity) {
       if ($this->updateEntityWithResult($entity, $all_entities_results[$idx], $ok_accuracy_types)) {
@@ -256,14 +256,17 @@ class Geocoder {
     }
 
     $best_result = NULL;
-    $best_score = NULL;
 
     foreach ($entity_result['response']['results'] as $result) {
       if (!in_array($result['accuracy_type'], $ok_accuracy_types)) {
         continue;
       }
 
-      if (empty($best_result) || $result['accuracy'] > $best_score) {
+      if ($result['accuracy'] < 0.8) {
+        continue;
+      }
+
+      if (empty($best_result) || ($result['accuracy'] > $best_result['accuracy'])) {
         $best_result = $result;
       }
     }
