@@ -36,3 +36,11 @@ ham_station.geocode_report_ajax:
     _controller: '\Drupal\ham_station\Controller\DefaultController::geocodeReportAjax'
   requirements:
     _permission: 'access content'
+
+ham_station.test1:
+  path: '/test1'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::test1'
+    _title: 'Test 1'
+  requirements:
+    _permission: 'access content'

@@ -18,6 +18,14 @@ services:
       - '@logger.channel.ham_station'
       - '@cache.default'
 
+  ham_station.osm_geocoder:
+    class: Drupal\ham_station\OSMGeocoder
+    arguments:
+      - '@http_client'
+      - '@entity_type.manager'
+      - '@database'
+      - '@logger.channel.ham_station'
+
   ham_station.ham_neighbors:
     class: Drupal\ham_station\Neighbors\HamNeighborsService
     arguments:

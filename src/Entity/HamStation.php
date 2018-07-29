@@ -259,6 +259,44 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
     $fields['latitude'] = static::decimalFieldDef('Latitude', 10, 7, $weight++);
     $fields['longitude'] = static::decimalFieldDef('Longitude', 10, 7, $weight++);
 
+    $fields['osm_geocode_status'] = BaseFieldDefinition::create('list_integer')
+      ->setLabel(t('OSM geocode status'))
+      ->setSetting('allowed_values', [
+        static::GEOCODE_STATUS_PENDING => 'Pending',
+        static::GEOCODE_STATUS_SUCCESS => 'Success',
+        static::GEOCODE_STATUS_NOT_FOUND => 'Not found',
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'weight' => $weight,
+      ])
+      ->setDisplayOptions('form', [
+        'weight' => $weight,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $weight++;
+
+    $fields['osm_geocode_response'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('OSM geocode response'))
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => $weight,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => $weight,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(FALSE);
+
+    $fields['osm_latitude'] = static::decimalFieldDef('OSM latitude', 10, 7, $weight++);
+    $fields['osm_longitude'] = static::decimalFieldDef('OSM longitude', 10, 7, $weight++);
+
     $fields['total_hash'] = static::stringFieldDef('Total hash', 40, $weight++);
     $fields['address_hash'] = static::stringFieldDef('Address hash', 40, $weight++);
 
