@@ -21,7 +21,7 @@ class Geocoder {
   /**
    * Number of times to retry a bad http response.
    */
-  const GEOCODE_MAX_RETRIES = 1;
+  const GEOCODE_MAX_RETRIES = 3;
 
   /**
    * The ham_station settings
@@ -162,7 +162,7 @@ class Geocoder {
       ];
     }
 
-    $retries = 3;
+    $retries = self::GEOCODE_MAX_RETRIES;
     $error_403 = FALSE;
 
     do {
