@@ -79,20 +79,23 @@ class OSMGeocoder {
    * @param callable $callback
    *   Optional callable used to report progress.
    */
-  public function geoCode($state, $batch_size = 1, callable $callback = NULL) {
+  public function geoCode($id_suffix, callable $callback = NULL) {
 
     // Get a batch of entities with pending geocode status.
     $query = $this->dbConnection->select('ham_station', 'hs')
       ->fields('hs', ['id']);
 
     $query->condition('hs.osm_geocode_status', HamStation::GEOCODE_STATUS_PENDING);
-    $query->condition('hs.address__administrative_area', $state);
-
-    $query->range(0, $batch_size);
+    $query->where('right(concat(\'000000\', id), :suffix_length) = :suffix', [
+      ':suffix_length' => strlen($id_suffix),
+      ':suffix' => $id_suffix,
+    ]);
 
     $entity_rows = $query->execute();
+
     $success_count = 0;
     $not_found_count = 0;
+    $count = 0;
 
     foreach ($entity_rows as $entity_row) {
       $entity = HamStation::load($entity_row->id);
@@ -172,6 +175,11 @@ class OSMGeocoder {
       }
 
       $entity->save();
+
+      $count++;
+      if ($count % 100 == 0) {
+        $this->printFeedback($count, $callback);
+      }
     }
 
     $msg = sprintf(

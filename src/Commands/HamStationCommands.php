@@ -4,6 +4,7 @@ namespace Drupal\ham_station\Commands;
 
 use Drupal\ham_station\Geocoder;
 use Drupal\ham_station\Importers\FccImporter;
+use Drupal\ham_station\OSMGeocoder;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -25,9 +26,17 @@ class HamStationCommands extends DrushCommands {
    */
   private $geocoder;
 
-  public function __construct(FccImporter $fcc_importer, Geocoder $geocoder) {
+  /**
+   * OSM geocoding service.
+   *
+   * @var OSMGeocoder
+   */
+  private $osmGeocoder;
+
+  public function __construct(FccImporter $fcc_importer, Geocoder $geocoder, OSMGeocoder $osm_geocoder) {
     $this->fccImporter = $fcc_importer;
     $this->geocoder = $geocoder;
+    $this->osmGeocoder = $osm_geocoder;
   }
 
   /**
@@ -92,6 +101,22 @@ class HamStationCommands extends DrushCommands {
    */
   public function reloadLatlng() {
     $this->geocoder->reloadLatLng([$this->io(), 'writeln']);
+  }
+
+  /**
+   * Geocode from OSM data.
+   *
+   * @param $id_suffix
+   *   Last two digits of entity id.
+   *
+   * @usage ham_station:osmgeocode
+   *   Geocode some addresses.
+   *
+   * @command ham_station:osmgeocode
+   * @aliases hsiosmgeo
+   */
+  public function osmgeocode($id_suffix) {
+    $this->osmGeocoder->geoCode($id_suffix, [$this->io(), 'writeln']);
   }
 
 }

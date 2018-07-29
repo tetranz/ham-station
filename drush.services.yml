@@ -1,6 +1,6 @@
 services:
   ham_station.commands:
     class: \Drupal\ham_station\Commands\HamStationCommands
-    arguments: ['@ham_station.fcc_importer', '@ham_station.geocoder']
+    arguments: ['@ham_station.fcc_importer', '@ham_station.geocoder', '@ham_station.osm_geocoder']
     tags:
       - { name: drush.command }
