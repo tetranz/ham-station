@@ -59,7 +59,7 @@ class HamStationConfigForm extends ConfigFormBase {
     $form[$key] = [
       '#type' => 'number',
       '#title' => $this->t('Number of geocoding attempted on each cron.'),
-      '#min' => 1,
+      '#min' => 0,
       '#step' => 1,
       '#default_value' => $config->get($key),
     ];
