@@ -7,7 +7,6 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Url;
 use Drupal\ham_station\Entity\HamStation;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -114,6 +113,10 @@ class Geocoder {
       throw new \Exception('Geocode batch size is not set.');
     }
 
+    if ($batch_size == 0) {
+      return;
+    }
+
     // Get a batch of entities with pending geocode status.
     // Where there are multiple stations at the same address, get only one.
     // Don't get stations where we have already successfully geocoded the same
@@ -162,7 +165,7 @@ class Geocoder {
       ];
     }
 
-    $retries = self::GEOCODE_MAX_RETRIES;
+    $retries = 0;
     $error_403 = FALSE;
 
     do {
