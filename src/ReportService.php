@@ -61,12 +61,12 @@ class ReportService {
     $query->groupBy('hs.address__administrative_area, hs.geocode_status');
     $rows = $query->execute();
 
-    $totals = [0, 0, 0];
+    $totals = [0, 0, 0, 0];
     $states = [];
 
     foreach ($rows as $row) {
       if (!isset($states[$row->state])) {
-        $states[$row->state] = [0, 0, 0];
+        $states[$row->state] = [0, 0, 0, 0];
       }
 
       $states[$row->state][$row->status] = $row->count;
@@ -79,22 +79,6 @@ class ReportService {
       'states' => $states,
       'totals' => $totals,
     ];
-
-    $done = [];
-    $working_on = NULL;
-
-    foreach ($states as $state => $counts) {
-      if ($counts[0] == 0) {
-        $done[] = $state;
-      }
-      elseif ($working_on === NULL && ($counts[1] > 0 || $counts[2] > 0)) {
-        $working_on = $state;
-      }
-    }
-
-    $result['done'] = $done;
-    $result['working_on'] = $working_on;
-    $result['success_pc'] = 100 * $totals[1] / ($totals[1] + $totals[2]);
 
     // Cache is invalidated when geocoding happens.
     $this->cache->set($cache_key, $result);

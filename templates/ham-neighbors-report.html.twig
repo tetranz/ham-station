@@ -3,7 +3,7 @@
     <table class="table table-condensed table-bordered ham-neighbors-counts">
       <thead>
       <tr>
-      <th>State</th><th>Still trying</th><th>Successful</th><th>Not Found</th>
+      <th>State</th><th>Still trying</th><th>Successful</th><th>Not Found</th><th>PO Box</th>
       </tr>
       </thead>
       <tbody>
@@ -14,6 +14,7 @@
         <td>{{ values.0 }}</td>
         <td>{{ values.1 }}</td>
         <td>{{ values.2 }}</td>
+        <td>{{ values.3 }}</td>
       </tr>
 
       {% endfor %}
@@ -23,10 +24,10 @@
         <td><strong>{{ totals.0 }}</strong></td>
         <td><strong>{{ totals.1 }}</strong></td>
         <td><strong>{{ totals.2 }}</strong></td>
+        <td><strong>{{ totals.3 }}</strong></td>
       </tr>
 
       </tbody>
     </table>
-    {# <p>Success rate: {{ '%.1f %%'|format(success_pc) }}</p> #}
   </div>
 </div>
