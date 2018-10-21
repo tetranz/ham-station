@@ -20,7 +20,7 @@ class AddressNoCountryFormatter extends AddressDefaultFormatter {
 
   public static function postRender($content, array $element) {
     /** @var \CommerceGuys\Addressing\AddressFormat\AddressFormat $address_format */
-    $address_format = $element['address_format']['#value'];
+    $address_format = $element['#address_format'];
     $format_string = $address_format->getFormat();
 
     $replacements = [];
