@@ -3,3 +3,8 @@ entity.ham_station.add_form:
   title: 'Add Amateur Radio Station'
   appears_on:
     - entity.ham_station.collection
+entity.ham_address.add_form:
+  route_name: entity.ham_address.add_form
+  title: 'Add Ham address'
+  appears_on:
+    - entity.ham_address.collection

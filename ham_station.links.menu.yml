@@ -18,3 +18,17 @@ ham_station.admin.config:
   description: 'Configure Amateur Radio Station module'
   route_name: ham_station.config
   parent: system.admin_config_services
+
+# Ham address menu items definition
+entity.ham_address.collection:
+  title: 'Ham address list'
+  route_name: entity.ham_address.collection
+  description: 'List Ham address entities'
+  parent: system.admin_structure
+  weight: 100
+
+ham_address.admin.structure.settings:
+  title: 'Ham address settings'
+  description: 'Configure Ham address entities'
+  route_name: ham_address.settings
+  parent: system.admin_structure

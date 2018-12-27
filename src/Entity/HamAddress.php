@@ -7,55 +7,54 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\ham_station\Geocoder;
 use Drupal\user\UserInterface;
 
 /**
- * Defines the Amateur Radio Station entity.
+ * Defines the Ham address entity.
  *
  * @ingroup ham_station
  *
  * @ContentEntityType(
- *   id = "ham_station",
- *   label = @Translation("Amateur Radio Station"),
+ *   id = "ham_address",
+ *   label = @Translation("Ham address"),
  *   handlers = {
- *     "storage_schema" = "Drupal\ham_station\HamStationStorageSchema",
+ *     "storage_schema" = "Drupal\ham_station\HamAddressStorageSchema",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\ham_station\HamStationListBuilder",
- *     "views_data" = "Drupal\ham_station\Entity\HamStationViewsData",
+ *     "list_builder" = "Drupal\ham_station\HamAddressListBuilder",
+ *     "views_data" = "Drupal\ham_station\Entity\HamAddressViewsData",
  *
  *     "form" = {
- *       "default" = "Drupal\ham_station\Form\HamStationForm",
- *       "add" = "Drupal\ham_station\Form\HamStationForm",
- *       "edit" = "Drupal\ham_station\Form\HamStationForm",
- *       "delete" = "Drupal\ham_station\Form\HamStationDeleteForm",
+ *       "default" = "Drupal\ham_station\Form\HamAddressForm",
+ *       "add" = "Drupal\ham_station\Form\HamAddressForm",
+ *       "edit" = "Drupal\ham_station\Form\HamAddressForm",
+ *       "delete" = "Drupal\ham_station\Form\HamAddressDeleteForm",
  *     },
- *     "access" = "Drupal\ham_station\HamStationAccessControlHandler",
+ *     "access" = "Drupal\ham_station\HamAddressAccessControlHandler",
  *     "route_provider" = {
- *       "html" = "Drupal\ham_station\HamStationHtmlRouteProvider",
+ *       "html" = "Drupal\ham_station\HamAddressHtmlRouteProvider",
  *     },
  *   },
- *   base_table = "ham_station",
- *   admin_permission = "administer amateur radio station entities",
+ *   base_table = "ham_address",
+ *   admin_permission = "administer ham address entities",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "callsign",
+ *     "label" = "name",
  *     "uuid" = "uuid",
  *     "uid" = "user_id",
  *     "langcode" = "langcode",
  *     "status" = "status",
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/ham_station/{ham_station}",
- *     "add-form" = "/admin/structure/ham_station/add",
- *     "edit-form" = "/admin/structure/ham_station/{ham_station}/edit",
- *     "delete-form" = "/admin/structure/ham_station/{ham_station}/delete",
- *     "collection" = "/admin/structure/ham_station",
+ *     "canonical" = "/admin/structure/ham_address/{ham_address}",
+ *     "add-form" = "/admin/structure/ham_address/add",
+ *     "edit-form" = "/admin/structure/ham_address/{ham_address}/edit",
+ *     "delete-form" = "/admin/structure/ham_address/{ham_address}/delete",
+ *     "collection" = "/admin/structure/ham_address",
  *   },
- *   field_ui_base_route = "ham_station.settings"
+ *   field_ui_base_route = "ham_address.settings"
  * )
  */
-class HamStation extends ContentEntityBase implements HamStationInterface {
+class HamAddress extends ContentEntityBase implements HamAddressInterface {
 
   use EntityChangedTrait;
 
@@ -79,15 +78,15 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCallsign() {
-    return $this->get('callsign')->value;
+  public function getName() {
+    return $this->get('name')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setCallsign($callsign) {
-    $this->set('callsign', $callsign);
+  public function setName($name) {
+    $this->set('name', $name);
     return $this;
   }
 
@@ -156,14 +155,9 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
-
     $weight = 0;
-    $fields['callsign'] = EntityHelper::stringFieldDef('Callsign', 20, $weight++);
-    $fields['first_name'] = EntityHelper::stringFieldDef('First Name', 255, $weight++);
-    $fields['middle_name'] = EntityHelper::stringFieldDef('Middle Initial or Name', 255, $weight++);
-    $fields['last_name'] = EntityHelper::stringFieldDef('Last Name', 255, $weight++);
-    $fields['suffix'] = EntityHelper::stringFieldDef('Suffix', 3, $weight++);
-    $fields['organization'] = EntityHelper::stringFieldDef('Organization Name', 255, $weight++);
+
+    $fields['hash'] = EntityHelper::stringFieldDef('Hash', 40, $weight++);
 
     // Use CommerceGuys Address field for address.
     $fields['address'] = BaseFieldDefinition::create('address')
@@ -193,10 +187,6 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
           'default_country' => 'US',
         ],
       ]);
-
-    $weight++;
-    $fields['operator_class'] = EntityHelper::stringFieldDef('Operator class', 1, $weight++);
-    $fields['previous_callsign'] = EntityHelper::stringFieldDef('Previous callsign', 20, $weight++);
 
     $fields['address_type'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Address type'))
@@ -297,12 +287,9 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
     $fields['osm_latitude'] = EntityHelper::decimalFieldDef('OSM latitude', 10, 7, $weight++);
     $fields['osm_longitude'] = EntityHelper::decimalFieldDef('OSM longitude', 10, 7, $weight++);
 
-    $fields['total_hash'] = EntityHelper::stringFieldDef('Total hash', 40, $weight++);
-    $fields['address_hash'] = EntityHelper::stringFieldDef('Address hash', 40, $weight++);
-
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the Amateur Radio Station entity.'))
+      ->setDescription(t('The user ID of author of the Ham address entity.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
@@ -310,11 +297,11 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'author',
-        'weight' => 45,
+        'weight' => 0,
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
-        'weight' => 45,
+        'weight' => 5,
         'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
@@ -327,11 +314,11 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Publishing status'))
-      ->setDescription(t('A boolean indicating whether the Amateur Radio Station is published.'))
+      ->setDescription(t('A boolean indicating whether the Ham address is published.'))
       ->setDefaultValue(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => 46,
+        'weight' => -3,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')

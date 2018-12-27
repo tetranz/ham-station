@@ -17,3 +17,22 @@ view published amateur radio station entities:
 
 view unpublished amateur radio station entities:
   title: 'View unpublished Amateur Radio Station entities'
+add ham address entities:
+  title: 'Create new Ham address entities'
+
+administer ham address entities:
+  title: 'Administer Ham address entities'
+  description: 'Allow to access the administration form to configure Ham address entities.'
+  restrict access: true
+
+delete ham address entities:
+  title: 'Delete Ham address entities'
+
+edit ham address entities:
+  title: 'Edit Ham address entities'
+
+view published ham address entities:
+  title: 'View published Ham address entities'
+
+view unpublished ham address entities:
+  title: 'View unpublished Ham address entities'

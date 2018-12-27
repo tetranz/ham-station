@@ -20,3 +20,25 @@ entity.ham_station.delete_form:
   title: Delete
   weight: 10
 
+# Ham address routing definition
+ham_address.settings_tab:
+  route_name: ham_address.settings
+  title: 'Settings'
+  base_route: ham_address.settings
+
+entity.ham_address.canonical:
+  route_name: entity.ham_address.canonical
+  base_route: entity.ham_address.canonical
+  title: 'View'
+
+entity.ham_address.edit_form:
+  route_name: entity.ham_address.edit_form
+  base_route: entity.ham_address.canonical
+  title: 'Edit'
+
+entity.ham_address.delete_form:
+  route_name:  entity.ham_address.delete_form
+  base_route:  entity.ham_address.canonical
+  title: Delete
+  weight: 10
+

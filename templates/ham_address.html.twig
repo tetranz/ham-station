@@ -1,0 +1,22 @@
+{#
+/**
+ * @file ham_address.html.twig
+ * Default theme implementation to present Ham address data.
+ *
+ * This template is used when viewing Ham address pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_ham_address()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('ham_address') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>
