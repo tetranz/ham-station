@@ -56,7 +56,8 @@ class Distance extends SortPluginBase implements ContainerFactoryPluginInterface
    * {@inheritdoc}
    */
   public function query() {
-    $this->query->addOrderBy(NULL, NULL, $this->options['order'], 'ham_station_distance');
+    $this->ensureMyTable();
+    $this->query->addOrderBy(NULL, NULL, $this->options['order'], $this->tableAlias . '_distance');
   }
   
 }

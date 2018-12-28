@@ -5,7 +5,6 @@ namespace Drupal\ham_station\Plugin\views\field;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\ham_station\DistanceService;
 use Drupal\views\Plugin\views\field\NumericField;
-use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -57,21 +56,13 @@ class Distance extends NumericField implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function query() {
-    /** @var \Drupal\views\Plugin\views\query\Sql $query */
-    $query = $this->query;
+    $this->ensureMyTable();
 
     /** @var \Drupal\ham_station\Plugin\views\argument\ArgInterface $argument */
     $argument = reset($this->view->argument);
     $values = $argument->getParsedArgument();
     $formula = $this->distanceService->getDistanceFormula($values['lat'], $values['lng'], $values['units'], $this->table);
-    $this->field_alias = $query->addField(NULL, $formula, substr($this->placeholder(), 1));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function render(ResultRow $row) {
-    return parent::render($row);
+    $this->field_alias = $this->query->addField(NULL, $formula, $this->tableAlias . '_' . $this->field);
   }
 
 }
