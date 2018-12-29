@@ -44,3 +44,6 @@ services:
 
   ham_station.grid_calculator:
     class: Drupal\ham_station\GridSquares\Calculator
+
+  ham_station.gridsquare_service:
+    class: Drupal\ham_station\GridSquares\GridSquareService

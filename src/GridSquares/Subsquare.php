@@ -5,7 +5,7 @@ namespace Drupal\ham_station\GridSquares;
 /**
  * Represents a grid subsquare.
  */
-class SubSquare {
+class Subsquare {
 
   private $code;
   private $lat_north;
@@ -64,33 +64,14 @@ class SubSquare {
     return $this->lng_west;
   }
 
-  public function __construct($code) {
+  public function __construct($code, $lat_south, $lat_north, $lat_center, $lng_west, $lng_east, $lng_center) {
     $this->code = $code;
-    $this->calculate();
-  }
-
-  private function calculate() {
-    $upper_a = ord('A');
-    $zero = ord('0');
-
-    $code = strtoupper($this->code);
-
-    $lng = (ord($code[0]) - $upper_a) * 20;
-    $lat = (ord($code[1]) - $upper_a) * 10;
-
-    $lng += (ord($code[2]) - $zero) * 2;
-    $lat += (ord($code[3]) - $zero);
-
-    $lng += (ord($code[4]) - $upper_a) / 12;
-    $lat += (ord($code[5]) - $upper_a) / 24;
-
-    $this->lng_west = $lng - 180;
-    $this->lng_east = $this->lng_west + (1/12);
-    $this->lng_center = ($this->lng_east + $this->lng_west) / 2;
-
-    $this->lat_south = $lat - 90;
-    $this->lat_north = $this->lat_south + (1/24);
-    $this->lat_center = ($this->lat_north + $this->lat_south) / 2;
+    $this->lat_south = $lat_south;
+    $this->lat_north = $lat_north;
+    $this->lat_center = $lat_center;
+    $this->lng_west = $lng_west;
+    $this->lng_east = $lng_east;
+    $this->lng_center = $lng_center;
   }
 
 }
