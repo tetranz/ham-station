@@ -49,7 +49,8 @@ class Rectangle extends Formula implements ArgInterface {
       'units' => $parts[4],
     ];
     
-    // Center coords are used by the distance field.
+    // Center coords are used by the distance field. These are used by the
+    // distance field plugin.
     $args['lat'] = ($args['lat_min'] + $args['lat_max']) / 2;
     $args['lng'] = ($args['lng_min'] + $args['lng_max']) / 2;
 

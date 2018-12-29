@@ -223,7 +223,7 @@ class HamNeighborsService {
     $return->gridEast = $gridSquare->getLngEast();
     $return->gridWest = $gridSquare->getLngWest();
 
-    $arg = sprintf('%s|%s|%s|%s|25|miles',
+    $arg = sprintf('%s|%s|%s|%s|miles',
       $gridSquare->getLatSouth(),
       $gridSquare->getLngWest(),
       $gridSquare->getLatNorth(),
