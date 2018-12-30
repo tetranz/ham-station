@@ -23,25 +23,65 @@ class HamNeighborsForm extends FormBase {
     $args = func_get_args();
     $query = $args[2];
 
-    $form['#attributes'] = [
-      'class' => ['form-inline', 'neighbors-form'],
+    $form['row1'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['row']],
     ];
 
-    $form['callsign'] = [
-      '#type' => 'textfield',
-      '#title' => 'Callsign or Gridsquare',
-      '#default_value' => $query,
-      '#attributes' => [
-        'class' => ['form-group', 'callsign-input']
+    $row1 = &$form['row1'];
+
+    $row1['col_left'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['col-md-3']],
+    ];
+
+    $col_left = &$row1['col_left'];
+
+    $col_left['query_type'] = [
+      '#type' => 'radios',
+      '#options' => [
+        'c' => 'Callsign',
+        'g' => 'Grid square',
+        'z' => 'Zip code',
+        'a' => 'Street address',
       ],
+      '#default_value' => 'c',
+    ];
+
+    $row1['col_right'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['col-md-5']],
+    ];
+
+    $col_right = &$row1['col_right'];
+
+    $col_right['callsign'] = [
+      '#type' => 'textfield',
+      '#title' => 'Callsign',
+      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-c']],
+    ];
+
+    $col_right['gridsquare'] = [
+      '#type' => 'textfield',
+      '#title' => 'Grid square',
+      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-g', 'hidden']],
+    ];
+
+    $col_right['zipcode'] = [
+      '#type' => 'textfield',
+      '#title' => 'Zip code',
+      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-z', 'hidden']],
+    ];
+
+    $col_right['street_address'] = [
+      '#type' => 'textfield',
+      '#title' => 'Street address',
+      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-a', 'hidden']],
     ];
 
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Find the neighbors'),
-      '#attributes' => [
-        'class' => ['btn', 'btn-primary', 'submit-button']
-      ],
       '#suffix' => '<span class="ajax-processing hidden"><strong>Processing...</strong></span>',
     ];
 

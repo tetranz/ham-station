@@ -1,6 +1,6 @@
 neighbors:
   js:
-    js/neighbors.js: {}
+    js/hamstation.js: {}
     https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY:
       type: external
   dependencies:
