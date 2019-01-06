@@ -47,3 +47,8 @@ services:
 
   ham_station.gridsquare_service:
     class: Drupal\ham_station\GridSquares\GridSquareService
+
+  ham_station.normalizer.getset:
+      class: Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer
+      tags:
+        - { name: normalizer }

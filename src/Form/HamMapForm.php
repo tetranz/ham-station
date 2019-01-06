@@ -6,14 +6,14 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Form for the ham neighbors page.
+ * Form for the ham map page.
  */
-class HamNeighborsForm extends FormBase {
+class HamMapForm extends FormBase {
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'ham_neighbors_form';
+    return 'ham_map_form';
   }
 
   /**
@@ -83,6 +83,12 @@ class HamNeighborsForm extends FormBase {
       '#type' => 'submit',
       '#value' => $this->t('Find the neighbors'),
       '#suffix' => '<span class="ajax-processing hidden"><strong>Processing...</strong></span>',
+    ];
+
+    $form['show_gridlabels'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show grid labels'),
+      '#default_value' => TRUE,
     ];
 
     return $form;

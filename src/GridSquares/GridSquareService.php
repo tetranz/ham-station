@@ -15,11 +15,11 @@ class GridSquareService {
   private $subsquares = [];
 
   /**
-   * Cache of neighboring subsquares keyed by central code.
+   * Cache of subsquare clusters keyed by central code.
    *
    * @var array
    */
-  private $neighboringSubsquares = [];
+  private $clusters = [];
 
   /**
    * @param float $lat
@@ -114,7 +114,7 @@ class GridSquareService {
   }
 
   /**
-   * Get a subsquare's neighboring subsquares.
+   * Get a cluster of neighboring subsquares.
    *
    * @param Subsquare $subsquare
    *   Central subsquare.
@@ -122,28 +122,29 @@ class GridSquareService {
    * @return array
    *   Array of subsquares.
    */
-  public function getNeighboringSubsquares(Subsquare $subsquare) {
+  public function getCluster(Subsquare $subsquare) {
     $code_uc = strtoupper($subsquare->getCode());
     
-    if (isset($this->neighboringSubsquares[$code_uc])) {
-      return $this->neighboringSubsquares[$code_uc];
+    if (isset($this->clusters[$code_uc])) {
+      return $this->clusters[$code_uc];
     }
-    
+
     $delta = 0.01;
-    $neighbors = [
-      'c' => $subsquare,
-      'nw' => $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngWest() - $delta),
-      'n' => $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngCenter()),
-      'ne' => $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngEast() + $delta),
-      'e' => $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngEast() + $delta),
-      'se' => $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngEast() + $delta),
-      's' => $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngCenter()),
-      'sw' => $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngWest() - $delta),
-      'w' => $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngWest() - $delta),
-    ];
     
-    $this->neighboringSubsquares[$code_uc] = $neighbors;
-    return $neighbors;
+    $cluster = new GridSquareCluster(
+      $subsquare,
+      $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngWest() - $delta),
+      $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngCenter()),
+      $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngEast() + $delta),
+      $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngEast() + $delta),
+      $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngEast() + $delta),
+      $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngCenter()),
+      $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngWest() - $delta),
+      $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngWest() - $delta)
+    );
+    
+    $this->clusters[$code_uc] = $cluster;
+    return $cluster;
   }
   
 }

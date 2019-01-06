@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilder;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\ham_station\Entity\HamStation;
+use Drupal\ham_station\Form\HamMapForm;
 use Drupal\ham_station\Form\HamNeighborsForm;
 use Drupal\ham_station\GridSquares\Calculator;
 use Drupal\ham_station\GridSquares\SubSquare;
@@ -100,7 +101,7 @@ class HamNeighborsService {
    *   Render array.
    */
   public function render($query) {
-    $form = $this->formBuilder->getForm(HamNeighborsForm::class, $query);
+    $form = $this->formBuilder->getForm(HamMapForm::class, $query);
 
     // Use callsign from the URL for an initial query. This makes page
     // bookmarkable and means that non-Javascript users still get the list.

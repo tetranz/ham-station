@@ -5,8 +5,12 @@ namespace Drupal\ham_station\Controller;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Renderer;
+use Drupal\ham_station\GridSquares\GridSquareService;
 use Drupal\ham_station\Neighbors\HamNeighborsService;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * Class DefaultController.
@@ -29,6 +33,22 @@ class DefaultController extends ControllerBase {
     $service = \Drupal::service('ham_station.ham_neighbors');
 
     return $service->render($callsign);
+  }
+
+  public function hamMapAjax(Request $request) {
+    /** @var GridSquareService $service */
+    $service = \Drupal::service('ham_station.gridsquare_service');
+    $subsq = $service->createSubsquareFromCode('FN42dt');
+    $cluster = $service->getCluster($subsq);
+
+    /** @var Serializer $serializer */
+    $serializer = \Drupal::service('serializer');
+    $data = $serializer->serialize($cluster, 'json');
+
+    $response = new JsonResponse();
+    $response->setJson($data);
+
+    return $response;
   }
 
   /**

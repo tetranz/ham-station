@@ -23,6 +23,14 @@ ham_station.ham_neighbors_ajax:
     _method: 'POST'
     _permission: 'access content'
 
+ham_station.ham_map_ajax:
+  path: '/ham-map-ajax'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::hamMapAjax'
+  requirements:
+    _method: 'POST'
+    _permission: 'access content'
+
 ham_station.states_done_ajax:
   path: '/neighbors-ajax/states-done-ajax'
   defaults:
