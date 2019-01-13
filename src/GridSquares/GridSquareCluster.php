@@ -13,7 +13,7 @@ class GridSquareCluster {
   private $south;
   private $southWest;
   private $west;
-  private $stations;
+  private $locations;
   private $mapCenterLat;
   private $mapCenterLng;
 
@@ -30,7 +30,7 @@ class GridSquareCluster {
    * @param $southWest
    * @param $west
    */
-  public function __construct($center, $northWest, $north, $northEast, $east, $southEast, $south, $southWest, $west, $map_center_lat = NULL, $map_center_lng = NULL, $stations = [])
+  public function __construct($center, $northWest, $north, $northEast, $east, $southEast, $south, $southWest, $west, $map_center_lat = NULL, $map_center_lng = NULL, $locations = [])
   {
     $this->center = $center;
     $this->northWest = $northWest;
@@ -43,7 +43,7 @@ class GridSquareCluster {
     $this->west = $west;
     $this->mapCenterLat = $map_center_lat;
     $this->mapCenterLng = $map_center_lng;
-    $this->stations = $stations;
+    $this->locations = $locations;
   }
 
   /**
@@ -150,12 +150,12 @@ class GridSquareCluster {
     $this->mapCenterLng = $mapCenterLng;
   }
 
-  public function setStations(array $stations) {
-    $this->stations = $stations;
+  public function setLocations(array $locations) {
+    $this->locations = $locations;
   }
 
-  public function getStations() {
-    return $this->stations;
+  public function getLocations() {
+    return $this->locations;
   }
 
 }

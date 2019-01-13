@@ -8,6 +8,7 @@ const hamstationApp = (function ($) {
     let rectangles = [];
     let gridLabels = [];
     let markers = [];
+    let activeInfoWindow = null;
     let txtOverlay;
     let gridKeys = ['center', 'northWest', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west'];
 
@@ -35,6 +36,12 @@ const hamstationApp = (function ($) {
         });
 
         $('.map-container').show();
+        map.addListener('click', function () {
+          console.log('aaa');
+        });
+      }
+      else {
+        map.setCenter(center);
       }
     }
 
@@ -95,18 +102,50 @@ const hamstationApp = (function ($) {
       markers = [];
 
       if (show) {
-        mapData.stations.forEach(el => drawMarker(el));
+        mapData.locations.forEach(el => drawMarker(el));
       }
     }
 
-    function drawMarker(address) {
-      marker = new google.maps.Marker({
-        position: {lat: address.lat, lng: address.lng},
+    function drawMarker(location) {
+      let marker = new google.maps.Marker({
+        position: {lat: location.lat, lng: location.lng},
         map: map,
-        label: address.stations[0].callsign + (address.stations.length > 1 ? '+' : '')
+        label: location.stations[0].callsign + (location.stations.length > 1 ? '+' : '')
       });
 
       markers.push(marker);
+
+      marker.addListener('click', e => {
+        if (activeInfoWindow) {
+          activeInfoWindow.close();
+          activeInfoWindow = null;
+        }
+
+        let lines = [];
+        lines.push(`<span>${location.address1}</span>`);
+        if (location.address2) {
+          lines.push(`<span>${location.address2}</span>`);
+        }
+
+        lines.push(`<span>${location.city}, ${location.state} ${location.zip}</span>`);
+
+        location.stations.forEach(el => {
+          lines.push('');
+          let line = `<span>${el.callsign}</span> </span> <a href="https://www.qrz.com/db/${el.callsign}">qrz.com</a>`;
+          if (el.operatorClass) {
+            line += (' ' + el.operatorClass);
+          }
+          lines.push(line);
+          lines.push(`<span>${el.name}</span>`);
+        });
+
+        let infowindow = new google.maps.InfoWindow({
+          content: lines.join('<br>')
+        });
+
+        infowindow.open(map, marker);
+        activeInfoWindow = infowindow;
+      });
     }
 
     return {

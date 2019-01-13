@@ -73,7 +73,12 @@ class GridSquareService {
     $grid_cluster = $this->getClusterFromLatLng($lat, $lng);
     $grid_cluster->setMapCenterLat($lat);
     $grid_cluster->setMapCenterLng($lng);
-    $grid_cluster->setStations($this->getStationsInRadius($lat, $lng, 5, 'miles'));
+
+//    $grid_cluster->setMapCenterLat($grid_cluster->getCenter()->getLatCenter());
+//    $grid_cluster->setMapCenterLng($grid_cluster->getCenter()->getLngCenter());
+
+    $grid_cluster->setLocations($this->getStationsInRadius($lat, $lng, 20, 'miles'));
+//    $grid_cluster->setStations($this->getStationsInRadius($grid_cluster->getCenter()->getLatCenter(), $grid_cluster->getCenter()->getLngCenter(), 5, 'miles'));
 
     return $grid_cluster;
   }
@@ -253,22 +258,19 @@ class GridSquareService {
   }
 
   public function getStationsInRadius($lat, $lng, $radius, $units) {
+    $st = microtime(true);
+
     $address_alias = 'ha';
     $distance_formula = $this->distanceService->getDistanceFormula($lat, $lng, $units, $address_alias);
     $box_formula = $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $address_alias);
 
     $query = $this->dbConnection->select('ham_address', $address_alias);
-    $query->addJoin('INNER', 'ham_station', 'hs', 'hs.address_hash = ha.hash');
-    $query->addField('ha', 'id', 'address_id');
-
-    $query->fields('hs', ['callsign', 'first_name', 'middle_name', 'last_name', 'organization']);
-    $query->fields('ha', ['address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'latitude', 'longitude']);
-
+    $query->fields($address_alias, ['id', 'hash', 'address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'latitude', 'longitude']);
     $query->addExpression($distance_formula, 'distance');
 
     $query->where($box_formula);
     $query->where($distance_formula . ' < :radius', [':radius' => $radius]);
-    $query->range(0, 150);
+    $query->range(0, 200);
     $query->orderBy('distance');
 
     $result = [];
@@ -278,10 +280,10 @@ class GridSquareService {
     // array rather than associative. This makes it an array when serialized
     // to json.
     $indexMap = [];
+    $hashes = [];
 
     foreach ($stmt as $row) {
-
-      if (!isset($indexMap[$row->address_id])) {
+      if (!isset($indexMap[$row->id])) {
         $result[] = new HamAddressDTO(
           $row->address__address_line1,
           $row->address__address_line2,
@@ -291,17 +293,31 @@ class GridSquareService {
           (float) $row->latitude,
           (float) $row->longitude
         );
-        $indexMap[$row->address_id] = count($result) - 1;
-      }
 
-      $result[$indexMap[$row->address_id]]->addStation(new HamStationDTO(
+        $idx = count($result) - 1;
+        $indexMap[$row->id] = $idx;
+        $hashes[$row->hash] = $idx;
+      }
+    }
+
+    $query = $this->dbConnection->select('ham_station', 'hs');
+    $query->fields('hs', ['address_hash', 'callsign', 'first_name', 'middle_name', 'last_name', 'suffix', 'organization', 'operator_class']);
+    $query->condition('address_hash', array_keys($hashes), 'IN');
+    $stmt = $query->execute();
+
+    foreach ($stmt as $row) {
+      $result[$hashes[$row->address_hash]]->addStation(new HamStationDTO(
         $row->callsign,
         $row->first_name,
+        $row->middle_name,
         $row->last_name,
-        $row->organization
+        $row->suffix,
+        $row->organization,
+        $row->operator_class
       ));
     }
 
+    $et = microtime(true) - $st;
     return $result;
   }
 
