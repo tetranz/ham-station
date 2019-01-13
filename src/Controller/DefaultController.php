@@ -4,9 +4,11 @@ namespace Drupal\ham_station\Controller;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\Query\Sql\Query;
 use Drupal\Core\Render\Renderer;
 use Drupal\ham_station\GridSquares\GridSquareService;
 use Drupal\ham_station\Neighbors\HamNeighborsService;
+use Drupal\ham_station\QueryService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,10 +38,13 @@ class DefaultController extends ControllerBase {
   }
 
   public function hamMapAjax(Request $request) {
+    $query_type = $request->get('queryType');
+    $query_value = $request->get('value');
+
     /** @var GridSquareService $service */
     $service = \Drupal::service('ham_station.gridsquare_service');
-    $subsq = $service->createSubsquareFromCode('FN42dt');
-    $cluster = $service->getCluster($subsq);
+
+    $cluster = $service->getMapDataByCallsign($query_value);
 
     /** @var Serializer $serializer */
     $serializer = \Drupal::service('serializer');

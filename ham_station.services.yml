@@ -47,6 +47,7 @@ services:
 
   ham_station.gridsquare_service:
     class: Drupal\ham_station\GridSquares\GridSquareService
+    arguments: ['@entity_type.manager', '@database', '@ham_station.distance_service']
 
   ham_station.normalizer.getset:
       class: Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer

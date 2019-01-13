@@ -59,6 +59,7 @@ class HamMapForm extends FormBase {
       '#type' => 'textfield',
       '#title' => 'Callsign',
       '#wrapper_attributes' => ['class' => ['query-input', 'query-input-c']],
+      '#default_value' => 'WB2WIK',
     ];
 
     $col_right['gridsquare'] = [

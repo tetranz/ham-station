@@ -7,6 +7,7 @@ const hamstationApp = (function ($) {
     let mapData;
     let rectangles = [];
     let gridLabels = [];
+    let markers = [];
     let txtOverlay;
     let gridKeys = ['center', 'northWest', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west'];
 
@@ -24,11 +25,8 @@ const hamstationApp = (function ($) {
     }
 
     function showMap() {
-      let center = {lat: mapData.center.latCenter, lng: mapData.center.lngCenter};
+      let center = {lat: mapData.mapCenterLat, lng: mapData.mapCenterLng};
       let map_container = document.querySelector('.map-container');
-
-      rectangles.forEach((el, index) => el.setMap(null));
-      rectangles = [];
 
       if (!map) {
         map = new google.maps.Map(map_container, {
@@ -41,20 +39,23 @@ const hamstationApp = (function ($) {
     }
 
     function drawGridsquares(show) {
+      rectangles.forEach((el, index) => {
+        rectangles[index].setMap(null);
+        rectangles[index] = null;
+      });
+
+      rectangles = [];
+
       if (show) {
         gridKeys.forEach(el => drawGridsquare(mapData[el]));
-      }
-      else {
-        rectangles.forEach(el => el.setMap(null));
-        rectangles = [];
       }
     }
 
     function drawGridsquare(subsquare) {
       let rectangle = new google.maps.Rectangle({
-        strokeColor: '#444444',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
+        strokeColor: '#000000',
+        strokeOpacity: 0.5,
+        strokeWeight: 1,
         fillOpacity: 0,
         map: map,
         bounds: {
@@ -69,17 +70,43 @@ const hamstationApp = (function ($) {
     }
 
     function writeGridlabels(show) {
+      gridLabels.forEach((el, index) => {
+        gridLabels[index].setMap(null);
+        gridLabels[index] = null;
+      });
+
+      gridLabels = [];
+
       if (show) {
         gridKeys.forEach(el => writeGridLabel(mapData[el]));
-      }
-      else {
-        gridLabels.forEach(el => el.setMap(null));
-        gridLabels = [];
       }
     }
 
     function writeGridLabel(subsquare) {
       gridLabels.push(new txtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, "grid-marker", map));
+    }
+
+    function drawMarkers(show) {
+      markers.forEach((el, index) => {
+        markers[index].setMap(null);
+        markers[index] = null;
+      });
+
+      markers = [];
+
+      if (show) {
+        mapData.stations.forEach(el => drawMarker(el));
+      }
+    }
+
+    function drawMarker(address) {
+      marker = new google.maps.Marker({
+        position: {lat: address.lat, lng: address.lng},
+        map: map,
+        label: address.stations[0].callsign + (address.stations.length > 1 ? '+' : '')
+      });
+
+      markers.push(marker);
     }
 
     return {
@@ -88,7 +115,8 @@ const hamstationApp = (function ($) {
       selectQueryType: selectQueryType,
       showMap: showMap,
       drawGridsquares: drawGridsquares,
-      writeGridLabels: writeGridlabels
+      writeGridLabels: writeGridlabels,
+      drawMakers: drawMarkers
     };
 
   })();
@@ -97,19 +125,30 @@ const hamstationApp = (function ($) {
   const controller = (function (uiCtrl) {
     let context;
 
-    var setupEventListeners = () => {
+    let setupEventListeners = () => {
       $('input[type=radio][name=query_type]', context).change(e => {
         uiCtrl.selectQueryType(e.target.value);
       });
 
       $('#edit-submit', context).click(e => {
         e.preventDefault();
+        let queryType =  $('input[type=radio][name=query_type]').val();
 
-        $.post('/ham-map-ajax', (data) => {
+        let postData = {
+          queryType: queryType
+        };
+
+        if (queryType == 'c') {
+          postData.value = $('#edit-callsign').val();
+        }
+
+        $.post('/ham-map-ajax', postData, (data) => {
+          console.log(data);
           uiCtrl.setMapData(data);
           uiCtrl.showMap();
           uiCtrl.drawGridsquares(true);
           uiCtrl.writeGridLabels(true);
+          uiCtrl.drawMakers(true);
         });
 
       });

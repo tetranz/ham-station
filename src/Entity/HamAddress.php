@@ -38,7 +38,7 @@ use Drupal\user\UserInterface;
  *   admin_permission = "administer ham address entities",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "name",
+ *     "label" = "hash",
  *     "uuid" = "uuid",
  *     "uid" = "user_id",
  *     "langcode" = "langcode",

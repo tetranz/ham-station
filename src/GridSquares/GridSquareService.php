@@ -1,6 +1,11 @@
 <?php
 
 namespace Drupal\ham_station\GridSquares;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\ham_station\DistanceService;
+use Drupal\ham_station\Entity\HamAddress;
+use Drupal\ham_station\Entity\HamStation;
 
 /**
  * Service to provide subsquare calculations and factory.
@@ -19,7 +24,59 @@ class GridSquareService {
    *
    * @var array
    */
-  private $clusters = [];
+  private $gridClusters = [];
+
+  const QUERY_LOCATION_CALLSIGN_NOT_FOUND = 1;
+  const QUERY_LOCATION_CALLSIGN_NO_ADDRESS = 2;
+  const QUERY_LOCATION_CALLSIGN_NO_GEO = 3;
+  const QUERY_LOCATION_CALLSIGN_SUCCESS = 4;
+
+  /**
+   * @var EntityTypeManagerInterface
+   */
+  private $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var Connection
+   */
+  private $dbConnection;
+
+  /**
+   * The distance service.
+   *
+   * @var DistanceService
+   */
+  private $distanceService;
+
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    Connection $db_connection,
+    DistanceService $distance_service
+  ) {
+    $this->entityTypeManager = $entity_type_manager;
+    $this->dbConnection = $db_connection;
+    $this->distanceService = $distance_service;
+  }
+
+  public function getMapDataByCallsign($callsign) {
+    $result = $this->callsignQuery($callsign);
+
+    if ($result['status'] !== static::QUERY_LOCATION_CALLSIGN_SUCCESS) {
+      return NULL;
+    }
+
+    $lat = $result['lat'];
+    $lng = $result['lng'];
+
+    $grid_cluster = $this->getClusterFromLatLng($lat, $lng);
+    $grid_cluster->setMapCenterLat($lat);
+    $grid_cluster->setMapCenterLng($lng);
+    $grid_cluster->setStations($this->getStationsInRadius($lat, $lng, 5, 'miles'));
+
+    return $grid_cluster;
+  }
 
   /**
    * @param float $lat
@@ -103,7 +160,7 @@ class GridSquareService {
    *
    * @param float $lat
    *   Latitude.
-   * @param flow $lng
+   * @param float $lng
    *   Longatude.
    * @return SubSquare
    *   Subsquare.
@@ -119,14 +176,14 @@ class GridSquareService {
    * @param Subsquare $subsquare
    *   Central subsquare.
    *
-   * @return array
-   *   Array of subsquares.
+   * @return GridSquareCluster
+   *   Cluster of 9 subsquares.
    */
   public function getCluster(Subsquare $subsquare) {
     $code_uc = strtoupper($subsquare->getCode());
     
-    if (isset($this->clusters[$code_uc])) {
-      return $this->clusters[$code_uc];
+    if (isset($this->gridClusters[$code_uc])) {
+      return $this->gridClusters[$code_uc];
     }
 
     $delta = 0.01;
@@ -143,8 +200,109 @@ class GridSquareService {
       $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngWest() - $delta)
     );
     
-    $this->clusters[$code_uc] = $cluster;
+    $this->gridClusters[$code_uc] = $cluster;
     return $cluster;
   }
-  
+
+  private function getClusterFromLatLng($lat, $lng) {
+    $center_subsquare = $this->createSubsquareFromLatLng($lat, $lng);
+    return $this->getCluster($center_subsquare);
+  }
+
+  private function callsignQuery($callsign) {
+
+    $storage = $this->entityTypeManager->getStorage('ham_station');
+
+    $entity_ids = $storage
+      ->getQuery()
+      ->condition('callsign', $callsign)
+      ->execute();
+
+    $return = ['callsign' => $callsign];
+
+    if (empty($entity_ids)) {
+      return $return + ['status' => static::QUERY_LOCATION_CALLSIGN_NOT_FOUND];
+    }
+
+    /** @var HamStation $ham_station */
+    $ham_station = $storage->load(reset($entity_ids));
+
+    $storage = $this->entityTypeManager->getStorage('ham_address');
+
+    $entity_ids = $storage
+      ->getQuery()
+      ->condition('hash', $ham_station->get('address_hash')->value)
+      ->execute();
+
+    if (empty($entity_ids)) {
+      return $return + ['status' => static::QUERY_LOCATION_CALLSIGN_NO_ADDRESS];
+    }
+
+    /** @var HamAddress $ham_address */
+    $ham_address = $storage->load(reset($entity_ids));
+
+    if ($ham_address->get('geocode_status')->value != HamAddress::GEOCODE_STATUS_SUCCESS) {
+      return $return + ['status' => static::QUERY_LOCATION_CALLSIGN_NO_GEO];
+    }
+
+    return $return + [
+      'status' => static::QUERY_LOCATION_CALLSIGN_SUCCESS,
+      'lat' => (float) $ham_address->get('latitude')->value,
+      'lng' => (float) $ham_address->get('longitude')->value
+    ];
+  }
+
+  public function getStationsInRadius($lat, $lng, $radius, $units) {
+    $address_alias = 'ha';
+    $distance_formula = $this->distanceService->getDistanceFormula($lat, $lng, $units, $address_alias);
+    $box_formula = $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $address_alias);
+
+    $query = $this->dbConnection->select('ham_address', $address_alias);
+    $query->addJoin('INNER', 'ham_station', 'hs', 'hs.address_hash = ha.hash');
+    $query->addField('ha', 'id', 'address_id');
+
+    $query->fields('hs', ['callsign', 'first_name', 'middle_name', 'last_name', 'organization']);
+    $query->fields('ha', ['address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'latitude', 'longitude']);
+
+    $query->addExpression($distance_formula, 'distance');
+
+    $query->where($box_formula);
+    $query->where($distance_formula . ' < :radius', [':radius' => $radius]);
+    $query->range(0, 150);
+    $query->orderBy('distance');
+
+    $result = [];
+    $stmt = $query->execute();
+
+    // map address_id to $result index. This means $result can be a sequencial
+    // array rather than associative. This makes it an array when serialized
+    // to json.
+    $indexMap = [];
+
+    foreach ($stmt as $row) {
+
+      if (!isset($indexMap[$row->address_id])) {
+        $result[] = new HamAddressDTO(
+          $row->address__address_line1,
+          $row->address__address_line2,
+          $row->address__locality,
+          $row->address__administrative_area,
+          $row->address__postal_code,
+          (float) $row->latitude,
+          (float) $row->longitude
+        );
+        $indexMap[$row->address_id] = count($result) - 1;
+      }
+
+      $result[$indexMap[$row->address_id]]->addStation(new HamStationDTO(
+        $row->callsign,
+        $row->first_name,
+        $row->last_name,
+        $row->organization
+      ));
+    }
+
+    return $result;
+  }
+
 }

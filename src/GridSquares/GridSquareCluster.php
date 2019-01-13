@@ -13,6 +13,9 @@ class GridSquareCluster {
   private $south;
   private $southWest;
   private $west;
+  private $stations;
+  private $mapCenterLat;
+  private $mapCenterLng;
 
   /**
    * GridSquareCluster constructor.
@@ -27,7 +30,7 @@ class GridSquareCluster {
    * @param $southWest
    * @param $west
    */
-  public function __construct($center, $northWest, $north, $northEast, $east, $southEast, $south, $southWest, $west)
+  public function __construct($center, $northWest, $north, $northEast, $east, $southEast, $south, $southWest, $west, $map_center_lat = NULL, $map_center_lng = NULL, $stations = [])
   {
     $this->center = $center;
     $this->northWest = $northWest;
@@ -38,10 +41,13 @@ class GridSquareCluster {
     $this->south = $south;
     $this->southWest = $southWest;
     $this->west = $west;
+    $this->mapCenterLat = $map_center_lat;
+    $this->mapCenterLng = $map_center_lng;
+    $this->stations = $stations;
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getCenter()
   {
@@ -49,7 +55,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getNorthWest()
   {
@@ -57,7 +63,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getNorth()
   {
@@ -65,7 +71,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getNorthEast()
   {
@@ -73,7 +79,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getEast()
   {
@@ -81,7 +87,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getSouthEast()
   {
@@ -89,7 +95,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getSouth()
   {
@@ -97,7 +103,7 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getSouthWest()
   {
@@ -105,11 +111,51 @@ class GridSquareCluster {
   }
 
   /**
-   * @return mixed
+   * @return Subsquare
    */
   public function getWest()
   {
     return $this->west;
+  }
+
+  /**
+   * @return null
+   */
+  public function getMapCenterLat()
+  {
+    return $this->mapCenterLat;
+  }
+
+  /**
+   * @param null $mapCenterLat
+   */
+  public function setMapCenterLat($mapCenterLat)
+  {
+    $this->mapCenterLat = $mapCenterLat;
+  }
+
+  /**
+   * @return null
+   */
+  public function getMapCenterLng()
+  {
+    return $this->mapCenterLng;
+  }
+
+  /**
+   * @param null $mapCenterLng
+   */
+  public function setMapCenterLng($mapCenterLng)
+  {
+    $this->mapCenterLng = $mapCenterLng;
+  }
+
+  public function setStations(array $stations) {
+    $this->stations = $stations;
+  }
+
+  public function getStations() {
+    return $this->stations;
   }
 
 }
