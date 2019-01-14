@@ -9,18 +9,14 @@ class HamAddressDTO {
   private $city;
   private $state;
   private $zip;
-  private $lat;
-  private $lng;
   private $stations = [];
 
-  public function __construct($address1, $address2, $city, $state, $zip, $lat, $lng) {
+  public function __construct($address1, $address2, $city, $state, $zip) {
     $this->address1 = $address1;
     $this->address2 = $address2;
     $this->city = $city;
     $this->state = $state;
     $this->zip = $zip;
-    $this->lat = $lat;
-    $this->lng = $lng;
   }
 
   public function addStation(HamStationDTO $station) {
@@ -65,22 +61,6 @@ class HamAddressDTO {
   public function getZip()
   {
     return $this->zip;
-  }
-
-  /**
-   * @return mixed
-   */
-  public function getLat()
-  {
-    return $this->lat;
-  }
-
-  /**
-   * @return mixed
-   */
-  public function getLng()
-  {
-    return $this->lng;
   }
 
   /**

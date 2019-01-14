@@ -107,10 +107,16 @@ const hamstationApp = (function ($) {
     }
 
     function drawMarker(location) {
-      let marker = new google.maps.Marker({
+      console.log(location);
+      let stationCount = 0;
+      location.addresses.forEach(address => {
+        address.stations.forEach(station => stationCount++);
+      });
+
+          let marker = new google.maps.Marker({
         position: {lat: location.lat, lng: location.lng},
         map: map,
-        label: location.stations[0].callsign + (location.stations.length > 1 ? '+' : '')
+        label: location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '')
       });
 
       markers.push(marker);
@@ -122,21 +128,25 @@ const hamstationApp = (function ($) {
         }
 
         let lines = [];
-        lines.push(`<span>${location.address1}</span>`);
-        if (location.address2) {
-          lines.push(`<span>${location.address2}</span>`);
+        let address = location.addresses[0];
+
+        lines.push(`<span>${address.address1}</span>`);
+        if (address.address2) {
+          lines.push(`<span>${address.address2}</span>`);
         }
 
-        lines.push(`<span>${location.city}, ${location.state} ${location.zip}</span>`);
+        lines.push(`<span>${address.city}, ${address.state} ${address.zip}</span>`);
 
-        location.stations.forEach(el => {
-          lines.push('');
-          let line = `<span>${el.callsign}</span> </span> <a href="https://www.qrz.com/db/${el.callsign}">qrz.com</a>`;
-          if (el.operatorClass) {
-            line += (' ' + el.operatorClass);
-          }
-          lines.push(line);
-          lines.push(`<span>${el.name}</span>`);
+        location.addresses.forEach(address => {
+          address.stations.forEach(station => {
+            lines.push('');
+            let line = `<span>${station.callsign}</span> </span> <a href="https://www.qrz.com/db/${station.callsign}">qrz.com</a>`;
+            if (station.operatorClass) {
+              line += (' ' + station.operatorClass);
+            }
+            lines.push(line);
+            lines.push(`<span>${station.name}</span>`);
+          });
         });
 
         let infowindow = new google.maps.InfoWindow({

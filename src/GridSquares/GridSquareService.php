@@ -276,44 +276,56 @@ class GridSquareService {
     $result = [];
     $stmt = $query->execute();
 
-    // map address_id to $result index. This means $result can be a sequencial
-    // array rather than associative. This makes it an array when serialized
-    // to json.
-    $indexMap = [];
-    $hashes = [];
+    // Nest by lat, lng, address and station.
+    // This ensures that slightly different addresses at the same position only
+    // create one map marker. Most of those are slight different spelling.
+    $location_map = [];
+    $address_map = [];
 
     foreach ($stmt as $row) {
-      if (!isset($indexMap[$row->id])) {
-        $result[] = new HamAddressDTO(
+      $latlng_str = sprintf('%s|%s', $row->latitude, $row->longitude);
+
+      if (!isset($location_map[$latlng_str])) {
+        $location = new HamLocation((float) $row->latitude, (float) $row->longitude);
+        $result[] = $location;
+        $location_idx = count($result) - 1;
+        $location_map[$latlng_str] = $location_idx;
+      }
+      else {
+        $location_idx = $location_map[$latlng_str];
+        $location = $result[$location_idx];
+      }
+
+      $location->addAddress(
+        new HamAddressDTO(
           $row->address__address_line1,
           $row->address__address_line2,
           $row->address__locality,
           $row->address__administrative_area,
-          $row->address__postal_code,
-          (float) $row->latitude,
-          (float) $row->longitude
-        );
+          $row->address__postal_code
+        )
+      );
 
-        $idx = count($result) - 1;
-        $indexMap[$row->id] = $idx;
-        $hashes[$row->hash] = $idx;
-      }
-    }
+      $address_map[$row->hash] = [$location_idx, count($location->getAddresses()) - 1];
+  }
 
     $query = $this->dbConnection->select('ham_station', 'hs');
     $query->fields('hs', ['address_hash', 'callsign', 'first_name', 'middle_name', 'last_name', 'suffix', 'organization', 'operator_class']);
-    $query->condition('address_hash', array_keys($hashes), 'IN');
+    $query->condition('address_hash', array_keys($address_map), 'IN');
     $stmt = $query->execute();
 
     foreach ($stmt as $row) {
-      $result[$hashes[$row->address_hash]]->addStation(new HamStationDTO(
-        $row->callsign,
-        $row->first_name,
-        $row->middle_name,
-        $row->last_name,
-        $row->suffix,
-        $row->organization,
-        $row->operator_class
+      $indexes = $address_map[$row->address_hash];
+
+      $result[$indexes[0]]->getAddresses()[$indexes[1]]->addStation(
+        new HamStationDTO(
+          $row->callsign,
+          $row->first_name,
+          $row->middle_name,
+          $row->last_name,
+          $row->suffix,
+          $row->organization,
+          $row->operator_class
       ));
     }
 
