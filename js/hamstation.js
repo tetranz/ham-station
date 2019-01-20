@@ -13,16 +13,14 @@ const hamstationApp = (function ($) {
     let gridKeys = ['center', 'northWest', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west'];
 
     function selectQueryType(queryType) {
-      const findClass = `query-input-${queryType}`;
-      $('.query-input').each((index, element) => {
-        let $element = $(element);
-        if ($element.hasClass(findClass)) {
-          $element.removeClass('hidden');
-        }
-        else {
-          $element.addClass('hidden');
-        }
-      });
+      let labels = {
+        c:['Callsign', 'Enter a callsign.'],
+        g:['Gridsquare', 'Enter a six character grid subsquare.'],
+        z:['Zip code', 'Enter a five digit zip code.']
+      };
+
+      document.querySelector('.ham-map-form .query-input label').innerHTML = labels[queryType][0];
+      document.querySelector('.ham-map-form .query-input .description').innerHTML = labels[queryType][1];
     }
 
     function showMap() {
@@ -220,6 +218,17 @@ const hamstationApp = (function ($) {
       ${station.name}`;
     }
 
+    function showError(error) {
+      let element = document.querySelector('.error-message');
+      element.innerHTML = error;
+      if (error) {
+        element.classList.remove('hidden');
+      }
+      else {
+        element.classList.add('hidden');
+      }
+    }
+
     return {
       init: txtOl => txtOverlay = txtOl,
       setMapData: md => mapData = md,
@@ -227,7 +236,8 @@ const hamstationApp = (function ($) {
       showMap: showMap,
       drawGridsquares: drawGridsquares,
       writeGridLabels: writeGridlabels,
-      drawMakers: drawMarkers
+      drawMakers: drawMarkers,
+      showError: showError
     };
 
   })();
@@ -243,24 +253,27 @@ const hamstationApp = (function ($) {
 
       $('#edit-submit', context).click(e => {
         e.preventDefault();
-        let queryType =  $('input[type=radio][name=query_type]').val();
 
-        let postData = {
-          queryType: queryType
-        };
-
-        if (queryType == 'c') {
-          postData.value = $('#edit-callsign').val();
+        let query = getAndFormatQuery();
+        if (!query) {
+          return;
         }
 
-        $.post('/ham-map-ajax', postData, (data) => {
-          uiCtrl.setMapData(data);
-          uiCtrl.showMap();
-          uiCtrl.drawGridsquares(true);
-          uiCtrl.writeGridLabels(true);
-          uiCtrl.drawMakers(true);
-        });
-
+        $.post('/ham-map-ajax',
+          query,
+          (data) => {
+            if (data.hasOwnProperty('error')) {
+              uiCtrl.showError(data.error);
+              return;
+            }
+            uiCtrl.showError('');
+            uiCtrl.setMapData(data);
+            uiCtrl.showMap();
+            uiCtrl.drawGridsquares(true);
+            uiCtrl.writeGridLabels(true);
+            uiCtrl.drawMakers(true);
+          }
+        );
       });
 
       $('#edit-show-gridlabels').click(e => {
@@ -268,6 +281,58 @@ const hamstationApp = (function ($) {
         uiCtrl.writeGridLabels(e.target.checked);
       });
     };
+
+    function getAndFormatQuery() {
+      let queryType = document.querySelector('input[type=radio][name=query_type]:checked').value;
+      let valueElement = document.getElementById('edit-query');
+
+      if (queryType == 'c') {
+        return getCallsignQuery(valueElement);
+      }
+
+      if (queryType == 'g') {
+        return getGridsquareQuery(valueElement);
+      }
+
+      if (queryType == 'z') {
+        return getZipcodeQuery(valueElement);
+      }
+    }
+
+    function getCallsignQuery(valueElement) {
+      let value = valueElement.value.trim();
+
+      if (!value) {
+        uiCtrl.showError('Please enter a callsign.');
+        return null;
+      }
+
+      valueElement.value = value.toUpperCase();
+      return {queryType:'c', value:valueElement.value};
+    }
+
+    function getGridsquareQuery(valueElement) {
+      let value = valueElement.value.trim();
+
+      if (!value.match(/^[A-R]{2}\d\d[a-x]{2}$/i)) {
+        uiCtrl.showError('Please enter a six character gridsquare.');
+        return null;
+      }
+
+      valueElement.value = value.substring(0, 2).toUpperCase() + value.substring(2, 4) + value.substring(4).toLowerCase();
+      return {queryType:'g', value:valueElement.value};
+    }
+
+    function getZipcodeQuery(valueElement) {
+      let value = valueElement.value.trim();
+
+      if (!value.match(/^\d{5}$/)) {
+        uiCtrl.showError('Please enter a five digit zip code.');
+        return null;
+      }
+
+      return {queryType:'z', value:value};
+    }
 
     return {
       'init': (ctx, txtOl) => {

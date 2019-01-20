@@ -47,9 +47,15 @@ services:
 
   ham_station.gridsquare_service:
     class: Drupal\ham_station\GridSquares\GridSquareService
-    arguments: ['@entity_type.manager', '@database', '@ham_station.distance_service']
+    arguments: ['@entity_type.manager', '@database', '@ham_station.distance_service', '@ham_station.geocodio']
 
   ham_station.normalizer.getset:
       class: Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer
       tags:
         - { name: normalizer }
+
+  ham_station.geocodio:
+    class: Drupal\ham_station\Geocodio
+    arguments:
+      - '@http_client'
+      - '@config.factory'

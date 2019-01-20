@@ -43,7 +43,6 @@ class HamMapForm extends FormBase {
         'c' => 'Callsign',
         'g' => 'Grid square',
         'z' => 'Zip code',
-        'a' => 'Street address',
       ],
       '#default_value' => 'c',
     ];
@@ -55,29 +54,17 @@ class HamMapForm extends FormBase {
 
     $col_right = &$row1['col_right'];
 
-    $col_right['callsign'] = [
+    $col_right['query'] = [
       '#type' => 'textfield',
-      '#title' => 'Callsign',
-      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-c']],
-      '#default_value' => 'WB2WIK',
+      '#title' => t('Callsign'),
+      '#description' => t('Enter a callsign.'),
+      '#wrapper_attributes' => ['class' => ['query-input']],
+      '#default_value' => 'NF1O',
     ];
 
-    $col_right['gridsquare'] = [
-      '#type' => 'textfield',
-      '#title' => 'Grid square',
-      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-g', 'hidden']],
-    ];
-
-    $col_right['zipcode'] = [
-      '#type' => 'textfield',
-      '#title' => 'Zip code',
-      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-z', 'hidden']],
-    ];
-
-    $col_right['street_address'] = [
-      '#type' => 'textfield',
-      '#title' => 'Street address',
-      '#wrapper_attributes' => ['class' => ['query-input', 'query-input-a', 'hidden']],
+    $col_right['error'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['error-message', 'hidden']],
     ];
 
     $form['submit'] = [

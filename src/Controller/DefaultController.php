@@ -44,11 +44,16 @@ class DefaultController extends ControllerBase {
     /** @var GridSquareService $service */
     $service = \Drupal::service('ham_station.gridsquare_service');
 
-    $cluster = $service->getMapDataByCallsign($query_value);
+    $result = $service->mapQuery($query_type, $query_value);
+    if (empty($result)) {
+      return new JsonResponse([
+        'error' => $service->getErrorMessage(),
+      ]);
+    }
 
     /** @var Serializer $serializer */
     $serializer = \Drupal::service('serializer');
-    $data = $serializer->serialize($cluster, 'json');
+    $data = $serializer->serialize($result, 'json');
 
     $response = new JsonResponse();
     $response->setJson($data);

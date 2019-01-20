@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\ham_station\DistanceService;
 use Drupal\ham_station\Entity\HamAddress;
 use Drupal\ham_station\Entity\HamStation;
+use Drupal\ham_station\Geocodio;
 
 /**
  * Service to provide subsquare calculations and factory.
@@ -25,6 +26,8 @@ class GridSquareService {
    * @var array
    */
   private $gridClusters = [];
+
+  private $errorMessage;
 
   const QUERY_LOCATION_CALLSIGN_NOT_FOUND = 1;
   const QUERY_LOCATION_CALLSIGN_NO_ADDRESS = 2;
@@ -50,36 +53,70 @@ class GridSquareService {
    */
   private $distanceService;
 
+  /**
+   * @var Geocodio
+   */
+  private $geocodio;
+
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
     Connection $db_connection,
-    DistanceService $distance_service
+    DistanceService $distance_service,
+    Geocodio $geocodio
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->dbConnection = $db_connection;
     $this->distanceService = $distance_service;
+    $this->geocodio = $geocodio;
   }
 
-  public function getMapDataByCallsign($callsign) {
+  public function mapQuery($query_type, $query_value) {
+    if ($query_type === 'c') {
+      return $this->getMapDataByCallsign($query_value);
+    }
+
+    if ($query_type === 'g') {
+      return $this->getMapDataByGridsquare($query_value);
+    }
+
+    if ($query_type === 'z') {
+      return $this->getMapDataByZipCode($query_value);
+    }
+  }
+
+  private function getMapDataByCallsign($callsign) {
+    $callsign = strtoupper($callsign);
     $result = $this->callsignQuery($callsign);
 
     if ($result['status'] !== static::QUERY_LOCATION_CALLSIGN_SUCCESS) {
+      $this->errorMessage = $result['error'];
       return NULL;
     }
 
-    $lat = $result['lat'];
-    $lng = $result['lng'];
+    return $this->getMapDataCentered($result['lat'], $result['lng'], $callsign);
+  }
 
+  private function getMapDataByGridsquare($code) {
+    $center_square = $this->createSubsquareFromCode($code);
+    return $this->getMapDataCentered($center_square->getLatCenter(), $center_square->getLngCenter());
+  }
+
+  private function getMapDataByZipCode($zipcode) {
+    $result = $this->geocodio->getPostalCode($zipcode);
+
+    if (empty($result)) {
+      $this->errorMessage = t('We can\'t find a location for that zip code.');
+      return NULL;
+    }
+
+    return $this->getMapDataCentered($result['lat'], $result['lng']);
+  }
+
+  private function getMapDataCentered($lat, $lng, $callsign = NULL) {
     $grid_cluster = $this->getClusterFromLatLng($lat, $lng);
     $grid_cluster->setMapCenterLat($lat);
     $grid_cluster->setMapCenterLng($lng);
-
-//    $grid_cluster->setMapCenterLat($grid_cluster->getCenter()->getLatCenter());
-//    $grid_cluster->setMapCenterLng($grid_cluster->getCenter()->getLngCenter());
-
     $grid_cluster->setLocations($this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign));
-//    $grid_cluster->setStations($this->getStationsInRadius($grid_cluster->getCenter()->getLatCenter(), $grid_cluster->getCenter()->getLngCenter(), 5, 'miles'));
-
     return $grid_cluster;
   }
 
@@ -226,7 +263,10 @@ class GridSquareService {
     $return = ['callsign' => $callsign];
 
     if (empty($entity_ids)) {
-      return $return + ['status' => static::QUERY_LOCATION_CALLSIGN_NOT_FOUND];
+      return $return + [
+        'status' => static::QUERY_LOCATION_CALLSIGN_NOT_FOUND,
+        'error' => sprintf('Callsign %s was not found.', $callsign),
+      ];
     }
 
     /** @var HamStation $ham_station */
@@ -240,14 +280,20 @@ class GridSquareService {
       ->execute();
 
     if (empty($entity_ids)) {
-      return $return + ['status' => static::QUERY_LOCATION_CALLSIGN_NO_ADDRESS];
+      return $return + [
+        'status' => static::QUERY_LOCATION_CALLSIGN_NO_ADDRESS,
+        'error' => sprintf('We were unable to geocode the location of callsign %s.', $callsign),
+      ];
     }
 
     /** @var HamAddress $ham_address */
     $ham_address = $storage->load(reset($entity_ids));
 
     if ($ham_address->get('geocode_status')->value != HamAddress::GEOCODE_STATUS_SUCCESS) {
-      return $return + ['status' => static::QUERY_LOCATION_CALLSIGN_NO_GEO];
+      return $return + [
+        'status' => static::QUERY_LOCATION_CALLSIGN_NO_GEO,
+        'error' => sprintf('We were unable to geocode the location of callsign %s.', $callsign),
+      ];
     }
 
     return $return + [
@@ -280,6 +326,10 @@ class GridSquareService {
     foreach ($stmt as $row) {
       $result[] = new HamLocationDTO((float) $row->latitude, (float) $row->longitude);
       $location_map[$row->id] = ++$idx;
+    }
+
+    if (empty($result)) {
+      return $result;
     }
 
     $address_alias = 'ha';
@@ -341,6 +391,10 @@ class GridSquareService {
 
     $et = microtime(true) - $st;
     return $result;
+  }
+
+  public function getErrorMessage() {
+    return $this->errorMessage;
   }
 
 }
