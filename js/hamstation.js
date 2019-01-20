@@ -29,6 +29,8 @@ const hamstationApp = (function ($) {
       let center = {lat: mapData.mapCenterLat, lng: mapData.mapCenterLng};
       let map_container = document.querySelector('.map-container');
 
+      clearMap();
+
       if (!map) {
         map = new google.maps.Map(map_container, {
           zoom: 14,
@@ -45,13 +47,49 @@ const hamstationApp = (function ($) {
       }
     }
 
-    function drawGridsquares(show) {
+    function clearMap() {
+      clearInfoWindow();
+      clearMarkers();
+      clearGridLabels();
+      clearRectangles();
+    }
+
+    function clearInfoWindow() {
+      if (activeInfoWindow) {
+        activeInfoWindow.close();
+        activeInfoWindow = null;
+      }
+    }
+
+    function clearRectangles() {
       rectangles.forEach((el, index) => {
         rectangles[index].setMap(null);
         rectangles[index] = null;
       });
 
       rectangles = [];
+    }
+
+    function clearGridLabels() {
+      gridLabels.forEach((el, index) => {
+        gridLabels[index].setMap(null);
+        gridLabels[index] = null;
+      });
+
+      gridLabels = [];
+    }
+
+    function clearMarkers() {
+      markers.forEach((el, index) => {
+        markers[index].setMap(null);
+        markers[index] = null;
+      });
+
+      markers = [];
+    }
+
+    function drawGridsquares(show) {
+      clearRectangles();
 
       if (show) {
         gridKeys.forEach(el => drawGridsquare(mapData[el]));
@@ -77,12 +115,7 @@ const hamstationApp = (function ($) {
     }
 
     function writeGridlabels(show) {
-      gridLabels.forEach((el, index) => {
-        gridLabels[index].setMap(null);
-        gridLabels[index] = null;
-      });
-
-      gridLabels = [];
+      clearGridLabels();
 
       if (show) {
         gridKeys.forEach(el => writeGridLabel(mapData[el]));
@@ -94,12 +127,7 @@ const hamstationApp = (function ($) {
     }
 
     function drawMarkers(show) {
-      markers.forEach((el, index) => {
-        markers[index].setMap(null);
-        markers[index] = null;
-      });
-
-      markers = [];
+      clearMarkers();
 
       if (show) {
         mapData.locations.forEach(el => drawMarker(el));
@@ -107,13 +135,12 @@ const hamstationApp = (function ($) {
     }
 
     function drawMarker(location) {
-      console.log(location);
       let stationCount = 0;
       location.addresses.forEach(address => {
         address.stations.forEach(station => stationCount++);
       });
 
-          let marker = new google.maps.Marker({
+      let marker = new google.maps.Marker({
         position: {lat: location.lat, lng: location.lng},
         map: map,
         label: location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '')
@@ -122,57 +149,75 @@ const hamstationApp = (function ($) {
       markers.push(marker);
 
       marker.addListener('click', e => {
-        if (activeInfoWindow) {
-          activeInfoWindow.close();
-          activeInfoWindow = null;
-        }
+        clearInfoWindow();
 
-        let content = '';
+        let addresses = [];
+        let lastIndex = location.addresses.length - 1;
+        let multi = location.addresses.length > 1;
         location.addresses.forEach((address, index) => {
-          content += '<div class="add add-' + index + '">' + writeAddress(address) + '</div>';
+          let classes = ['address'];
+          if (multi) {
+            if (index === 0) {
+              classes.push('first');
+            }
+            else if(index === lastIndex)
+            {
+              classes.push('last');
+            }
+          }
+          addresses.push(`<div class="${classes.join(' ')}">${writeAddress(address)}</div>`);
         });
 
+        let classes = ['infowindow'];
+        if (multi) {
+          classes.push('multi');
+        }
         let infowindow = new google.maps.InfoWindow({
-          content: '<div class="infowindow">' + content + '</div>'
+          content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`
         });
 
         infowindow.open(map, marker);
         activeInfoWindow = infowindow;
+
+        infowindow.addListener('closeclick', () => {
+          activeInfoWindow = null;
+        });
+
       });
     }
 
     function writeAddress(address) {
-      let chunks = [];
+      let stations = [];
+      let lastIndex = address.stations.length - 1;
+      let multi = address.stations.length > 1;
       address.stations.forEach((station, index) => {
-        if (index > 0) {
-          chunks.push('');
+        let classes = ['station'];
+        if (multi) {
+          if (index === 0) {
+            classes.push('first');
+          }
+          else if(index === lastIndex)
+          {
+            classes.push('last');
+          }
         }
-        chunks.push(writeStation(station));
+        stations.push(`<div class="${classes.join(' ')}">${writeStation(station)}</div>`)
       });
 
-      if (address.stations.length > 1) {
-        chunks.push('');
-      }
+      let address2 = address.address2 ? address.address2 + '<br>' : '';
 
-      chunks.push(address.address1);
-      if (address.address2) {
-        chunks.push(address.address2);
-      }
-
-      chunks.push(`${address.city}, ${address.state} ${address.zip}`);
-
-      return chunks.join('<br>');
+      return `<div class="stations">${stations.join('')}</div><div>
+        ${address.address1}<br>
+        ${address2}
+        ${address.city}, ${address.state} ${address.zip}</div>`;
     }
 
     function writeStation(station) {
-      let lines = [];
-      let line = `<span>${station.callsign}</span> </span> <a href="https://www.qrz.com/db/${station.callsign}">qrz.com</a>`;
-      if (station.operatorClass) {
-        line += (' ' + station.operatorClass);
-      }
-      lines.push(line);
-      lines.push(`<span>${station.name}</span>`);
-      return lines.join('<br>');
+      let opclass = station.operatorClass ? (' ' + station.operatorClass) : '';
+
+      return `
+      <span>${station.callsign}</span> <a href="https://www.qrz.com/db/${station.callsign}" target="_blank">qrz.com</a>${opclass}<br>
+      ${station.name}`;
     }
 
     return {
@@ -209,7 +254,6 @@ const hamstationApp = (function ($) {
         }
 
         $.post('/ham-map-ajax', postData, (data) => {
-          console.log(data);
           uiCtrl.setMapData(data);
           uiCtrl.showMap();
           uiCtrl.drawGridsquares(true);
