@@ -32,3 +32,17 @@ ham_address.admin.structure.settings:
   description: 'Configure Ham address entities'
   route_name: ham_address.settings
   parent: system.admin_structure
+
+# Ham location menu items definition
+entity.ham_location.collection:
+  title: 'Ham location list'
+  route_name: entity.ham_location.collection
+  description: 'List Ham location entities'
+  parent: system.admin_structure
+  weight: 100
+
+ham_location.admin.structure.settings:
+  title: 'Ham location settings'
+  description: 'Configure Ham location entities'
+  route_name: ham_location.settings
+  parent: system.admin_structure

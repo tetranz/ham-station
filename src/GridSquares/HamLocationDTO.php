@@ -2,7 +2,7 @@
 
 namespace Drupal\ham_station\GridSquares;
 
-class HamLocation {
+class HamLocationDTO {
 
   private $lat;
   private $lng;
@@ -35,6 +35,18 @@ class HamLocation {
 
   public function getAddresses() {
     return $this->addresses;
+  }
+
+  public function moveAddressToTop($top_idx) {
+    $address = $this->addresses[$top_idx];
+
+    if ($top_idx == 0) {
+      return $address;
+    }
+
+    unset($this->addresses[$top_idx]);
+    array_unshift($this->addresses, $address);
+    return $address;
   }
 
 }

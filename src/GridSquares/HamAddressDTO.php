@@ -71,4 +71,14 @@ class HamAddressDTO {
     return $this->stations;
   }
 
+  public function moveStationToTop($top_idx) {
+    if ($top_idx == 0) {
+      return;
+    }
+
+    $station = $this->stations[$top_idx];
+    unset($this->stations[$top_idx]);
+    array_unshift($this->stations, $station);
+  }
+
 }

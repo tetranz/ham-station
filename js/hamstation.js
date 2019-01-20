@@ -127,35 +127,52 @@ const hamstationApp = (function ($) {
           activeInfoWindow = null;
         }
 
-        let lines = [];
-        let address = location.addresses[0];
-
-        lines.push(`<span>${address.address1}</span>`);
-        if (address.address2) {
-          lines.push(`<span>${address.address2}</span>`);
-        }
-
-        lines.push(`<span>${address.city}, ${address.state} ${address.zip}</span>`);
-
-        location.addresses.forEach(address => {
-          address.stations.forEach(station => {
-            lines.push('');
-            let line = `<span>${station.callsign}</span> </span> <a href="https://www.qrz.com/db/${station.callsign}">qrz.com</a>`;
-            if (station.operatorClass) {
-              line += (' ' + station.operatorClass);
-            }
-            lines.push(line);
-            lines.push(`<span>${station.name}</span>`);
-          });
+        let content = '';
+        location.addresses.forEach((address, index) => {
+          content += '<div class="add add-' + index + '">' + writeAddress(address) + '</div>';
         });
 
         let infowindow = new google.maps.InfoWindow({
-          content: lines.join('<br>')
+          content: '<div class="infowindow">' + content + '</div>'
         });
 
         infowindow.open(map, marker);
         activeInfoWindow = infowindow;
       });
+    }
+
+    function writeAddress(address) {
+      let chunks = [];
+      address.stations.forEach((station, index) => {
+        if (index > 0) {
+          chunks.push('');
+        }
+        chunks.push(writeStation(station));
+      });
+
+      if (address.stations.length > 1) {
+        chunks.push('');
+      }
+
+      chunks.push(address.address1);
+      if (address.address2) {
+        chunks.push(address.address2);
+      }
+
+      chunks.push(`${address.city}, ${address.state} ${address.zip}`);
+
+      return chunks.join('<br>');
+    }
+
+    function writeStation(station) {
+      let lines = [];
+      let line = `<span>${station.callsign}</span> </span> <a href="https://www.qrz.com/db/${station.callsign}">qrz.com</a>`;
+      if (station.operatorClass) {
+        line += (' ' + station.operatorClass);
+      }
+      lines.push(line);
+      lines.push(`<span>${station.name}</span>`);
+      return lines.join('<br>');
     }
 
     return {

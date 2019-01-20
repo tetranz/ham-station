@@ -1,0 +1,22 @@
+{#
+/**
+ * @file ham_location.html.twig
+ * Default theme implementation to present Ham location data.
+ *
+ * This template is used when viewing Ham location pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_ham_location()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('ham_location') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>

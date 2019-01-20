@@ -1,4 +1,4 @@
-# Once only use to build ham_address_table.
+# Once only use to build ham_address table.
 
 INSERT INTO ham_address
 (hash, uuid, langcode, address__langcode, address__country_code,
@@ -21,3 +21,9 @@ MIN(latitude), MIN(longitude), MIN(osm_geocode_status), MIN(osm_geocode_response
 MIN(osm_latitude), MIN(osm_longitude), MIN(user_id), MIN(status), MIN(created), MIN(changed)
 FROM ham_station
 GROUP BY address_hash
+
+# Once only use to update ham_address table.
+
+UPDATE ham_address ha
+INNER JOIN ham_location hl ON hl.latitude = ha.latitude AND hl.longitude = ha.longitude
+SET ha.location_id = hl.id

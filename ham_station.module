@@ -7,6 +7,7 @@
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\views\ViewExecutable;
+use \Drupal\ham_station\Entity\HamLocation;
 
 /**
  * Implements hook_help().
@@ -154,4 +155,10 @@ function ham_station_views_post_execute(ViewExecutable $view) {
 
     $row->gridsquare = $gridsquare;
   }
+}
+
+function ham_station_location_label_callback(HamLocation $location) {
+  $lat = $location->get('latitude')->value;
+
+  return sprintf('%s,%s', $location->get('latitude')->value, $location->get('longitude')->value);
 }

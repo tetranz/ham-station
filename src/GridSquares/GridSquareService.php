@@ -77,7 +77,7 @@ class GridSquareService {
 //    $grid_cluster->setMapCenterLat($grid_cluster->getCenter()->getLatCenter());
 //    $grid_cluster->setMapCenterLng($grid_cluster->getCenter()->getLngCenter());
 
-    $grid_cluster->setLocations($this->getStationsInRadius($lat, $lng, 20, 'miles'));
+    $grid_cluster->setLocations($this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign));
 //    $grid_cluster->setStations($this->getStationsInRadius($grid_cluster->getCenter()->getLatCenter(), $grid_cluster->getCenter()->getLngCenter(), 5, 'miles'));
 
     return $grid_cluster;
@@ -257,17 +257,16 @@ class GridSquareService {
     ];
   }
 
-  public function getStationsInRadius($lat, $lng, $radius, $units) {
+  public function getStationsInRadius($lat, $lng, $radius, $units, $callsign) {
     $st = microtime(true);
 
-    $address_alias = 'ha';
-    $distance_formula = $this->distanceService->getDistanceFormula($lat, $lng, $units, $address_alias);
-    $box_formula = $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $address_alias);
+    $location_alias = 'hl';
+    $distance_formula = $this->distanceService->getDistanceFormula($lat, $lng, $units, $location_alias);
+    $box_formula = $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $location_alias);
 
-    $query = $this->dbConnection->select('ham_address', $address_alias);
-    $query->fields($address_alias, ['id', 'hash', 'address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'latitude', 'longitude']);
+    $query = $this->dbConnection->select('ham_location', $location_alias);
+    $query->fields($location_alias, ['id', 'latitude', 'longitude']);
     $query->addExpression($distance_formula, 'distance');
-
     $query->where($box_formula);
     $query->where($distance_formula . ' < :radius', [':radius' => $radius]);
     $query->range(0, 200);
@@ -276,48 +275,45 @@ class GridSquareService {
     $result = [];
     $stmt = $query->execute();
 
-    // Nest by lat, lng, address and station.
-    // This ensures that slightly different addresses at the same position only
-    // create one map marker. Most of those are slight different spelling.
     $location_map = [];
+    $idx = -1;
+    foreach ($stmt as $row) {
+      $result[] = new HamLocationDTO((float) $row->latitude, (float) $row->longitude);
+      $location_map[$row->id] = ++$idx;
+    }
+
+    $address_alias = 'ha';
+    $query = $this->dbConnection->select('ham_address', $address_alias);
+    $query->fields($address_alias, ['id', 'address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'location_id']);
+    $query->addJoin('INNER', 'ham_station', 'hs', 'hs.address_hash = ha.hash');
+    $query->fields('hs', ['callsign', 'first_name', 'middle_name', 'last_name', 'suffix', 'organization', 'operator_class']);
+    $query->condition('ha.location_id', array_keys($location_map), 'IN');
+    $stmt = $query->execute();
+
     $address_map = [];
+    $callsign_idx = NULL;
 
     foreach ($stmt as $row) {
-      $latlng_str = sprintf('%s|%s', $row->latitude, $row->longitude);
+      $result_idx = $location_map[$row->location_id];
+      /** @var HamLocationDTO $location */
+      $location = $result[$result_idx];
 
-      if (!isset($location_map[$latlng_str])) {
-        $location = new HamLocation((float) $row->latitude, (float) $row->longitude);
-        $result[] = $location;
-        $location_idx = count($result) - 1;
-        $location_map[$latlng_str] = $location_idx;
-      }
-      else {
-        $location_idx = $location_map[$latlng_str];
-        $location = $result[$location_idx];
-      }
-
-      $location->addAddress(
-        new HamAddressDTO(
+      if (!isset($address_map[$row->id])) {
+        $address = new HamAddressDTO(
           $row->address__address_line1,
           $row->address__address_line2,
           $row->address__locality,
           $row->address__administrative_area,
           $row->address__postal_code
-        )
-      );
+        );
+        $location->addAddress($address);
+        $address_map[$row->id] = count($location->getAddresses()) - 1;
+      }
+      else {
+        $address = $location->getAddresses()[$address_map[$row->id]];
+      }
 
-      $address_map[$row->hash] = [$location_idx, count($location->getAddresses()) - 1];
-  }
-
-    $query = $this->dbConnection->select('ham_station', 'hs');
-    $query->fields('hs', ['address_hash', 'callsign', 'first_name', 'middle_name', 'last_name', 'suffix', 'organization', 'operator_class']);
-    $query->condition('address_hash', array_keys($address_map), 'IN');
-    $stmt = $query->execute();
-
-    foreach ($stmt as $row) {
-      $indexes = $address_map[$row->address_hash];
-
-      $result[$indexes[0]]->getAddresses()[$indexes[1]]->addStation(
+      $address->addStation(
         new HamStationDTO(
           $row->callsign,
           $row->first_name,
@@ -326,7 +322,21 @@ class GridSquareService {
           $row->suffix,
           $row->organization,
           $row->operator_class
-      ));
+        )
+      );
+
+      if (!empty($callsign) && empty($callsign_idx) && $row->callsign === $callsign) {
+        $callsign_idx = [$result_idx, $address_map[$row->id], count($address->getStations()) - 1];
+      }
+    }
+
+    if (!empty($callsign_idx)) {
+      list($result_idx, $address_idx, $station_idx) = $callsign_idx;
+
+      /** @var HamLocationDTO $location */
+      $location = $result[$result_idx];
+      $address = $location->moveAddressToTop($address_idx);
+      $address->moveStationToTop($station_idx);
     }
 
     $et = microtime(true) - $st;

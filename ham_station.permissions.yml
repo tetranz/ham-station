@@ -36,3 +36,22 @@ view published ham address entities:
 
 view unpublished ham address entities:
   title: 'View unpublished Ham address entities'
+add ham location entities:
+  title: 'Create new Ham location entities'
+
+administer ham location entities:
+  title: 'Administer Ham location entities'
+  description: 'Allow to access the administration form to configure Ham location entities.'
+  restrict access: true
+
+delete ham location entities:
+  title: 'Delete Ham location entities'
+
+edit ham location entities:
+  title: 'Edit Ham location entities'
+
+view published ham location entities:
+  title: 'View published Ham location entities'
+
+view unpublished ham location entities:
+  title: 'View unpublished Ham location entities'
