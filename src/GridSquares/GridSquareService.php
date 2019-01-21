@@ -330,7 +330,11 @@ class GridSquareService {
     $location_map = [];
     $idx = -1;
     foreach ($stmt as $row) {
-      $result[] = new HamLocationDTO((float) $row->latitude, (float) $row->longitude);
+      $result[] = new HamLocationDTO(
+        (int) $row->id,
+        (float) $row->latitude,
+        (float) $row->longitude
+      );
       $location_map[$row->id] = ++$idx;
     }
 

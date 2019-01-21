@@ -4,13 +4,19 @@ namespace Drupal\ham_station\GridSquares;
 
 class HamLocationDTO {
 
+  private $id;
   private $lat;
   private $lng;
   private $addresses  = [];
 
-  public function __construct($lat, $lng) {
+  public function __construct($id, $lat, $lng) {
+    $this->id = $id;
     $this->lat = $lat;
     $this->lng = $lng;
+  }
+
+  public function getId() {
+    return $this->id;
   }
 
   /**

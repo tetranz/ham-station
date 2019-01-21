@@ -7,7 +7,8 @@ const hamstationApp = (function ($) {
     let mapData;
     let rectangles = [];
     let gridLabels = [];
-    let markers = [];
+    let markers = new Map();
+    let locationMap = new Map();
     let activeInfoWindow = null;
     let txtOverlay;
     let mapCenterChangedListener = null;
@@ -45,13 +46,6 @@ const hamstationApp = (function ($) {
       map.setCenter({lat: mapData.mapCenterLat, lng: mapData.mapCenterLng});
     }
 
-    function clearMap() {
-      clearInfoWindow();
-      clearMarkers();
-      clearGridLabels();
-      clearRectangles();
-    }
-
     function clearInfoWindow() {
       if (activeInfoWindow) {
         activeInfoWindow.close();
@@ -75,15 +69,6 @@ const hamstationApp = (function ($) {
       });
 
       gridLabels = [];
-    }
-
-    function clearMarkers() {
-      markers.forEach((el, index) => {
-        markers[index].setMap(null);
-        markers[index] = null;
-      });
-
-      markers = [];
     }
 
     function drawGridsquares(show) {
@@ -124,12 +109,19 @@ const hamstationApp = (function ($) {
       gridLabels.push(new txtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, "grid-marker", map));
     }
 
-    function drawMarkers(show) {
-      clearMarkers();
-
-      if (show) {
-        mapData.locations.forEach(el => drawMarker(el));
+    function drawMarkers() {
+      for (var [id, marker] of markers) {
+        if (!locationMap.has(id)) {
+          marker.setMap(null);
+          markers.delete(id);
+        }
       }
+
+      mapData.locations.forEach(location => {
+        if (!markers.has(location.id)) {
+          drawMarker(location);
+        }
+      });
     }
 
     function drawMarker(location) {
@@ -144,7 +136,7 @@ const hamstationApp = (function ($) {
         label: location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '')
       });
 
-      markers.push(marker);
+      markers.set(location.id, marker);
 
       marker.addListener('click', e => {
         clearInfoWindow();
@@ -229,15 +221,23 @@ const hamstationApp = (function ($) {
       }
     }
 
+    function setMapData(data) {
+      mapData = data;
+      locationMap.clear();
+      mapData.locations.forEach(location => {
+        locationMap.set(location.id, true);
+      });
+    }
+
     return {
       init: txtOl => txtOverlay = txtOl,
-      setMapData: md => mapData = md,
+      setMapData: setMapData,
       selectQueryType: selectQueryType,
       createMap: createMap,
       setMapCenter: setMapCenter,
       drawGridsquares: drawGridsquares,
       writeGridLabels: writeGridlabels,
-      drawMakers: drawMarkers,
+      drawMarkers: drawMarkers,
       showError: showError
     };
 
@@ -281,7 +281,7 @@ const hamstationApp = (function ($) {
             uiCtrl.setMapData(data);
             uiCtrl.drawGridsquares(showGrid);
             uiCtrl.writeGridLabels(showGrid);
-            uiCtrl.drawMakers(true);
+            uiCtrl.drawMarkers();
 
             if (setCenter) {
               uiCtrl.setMapCenter();
