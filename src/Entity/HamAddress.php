@@ -246,9 +246,6 @@ class HamAddress extends ContentEntityBase implements HamAddressInterface {
 
     $weight++;
 
-    $fields['latitude'] = EntityHelper::decimalFieldDef('Latitude', 10, 7, $weight++);
-    $fields['longitude'] = EntityHelper::decimalFieldDef('Longitude', 10, 7, $weight++);
-
     $fields['location_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
       ->setDescription(t('The related HamLocation entity.'))
@@ -258,7 +255,6 @@ class HamAddress extends ContentEntityBase implements HamAddressInterface {
       ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-//        'type' => 'author',
         'weight' => 0,
       ])
       ->setDisplayOptions('form', [
@@ -267,7 +263,6 @@ class HamAddress extends ContentEntityBase implements HamAddressInterface {
         'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
- //         'autocomplete_type' => 'tags',
           'placeholder' => '',
         ],
       ])
