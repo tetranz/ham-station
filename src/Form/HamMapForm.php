@@ -59,7 +59,6 @@ class HamMapForm extends FormBase {
       '#title' => t('Callsign'),
       '#description' => t('Enter a callsign.'),
       '#wrapper_attributes' => ['class' => ['query-input']],
-      '#default_value' => 'NF1O',
     ];
 
     $col_right['error'] = [
@@ -70,7 +69,7 @@ class HamMapForm extends FormBase {
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Find the neighbors'),
-      '#suffix' => '<span class="ajax-processing hidden"><strong>Processing...</strong></span>',
+      '#attributes' => ['class' => ['btn btn-primary']],
     ];
 
     $form['show_gridlabels'] = [
