@@ -20,9 +20,6 @@ class HamMapForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $args = func_get_args();
-    $query = $args[2];
-
     $form['row1'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['row']],
@@ -68,7 +65,7 @@ class HamMapForm extends FormBase {
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Find the neighbors'),
+      '#value' => $this->t('Show the map'),
       '#attributes' => ['class' => ['btn btn-primary']],
     ];
 

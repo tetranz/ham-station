@@ -22,19 +22,14 @@ class DefaultController extends ControllerBase {
   /**
    * Ham neighbors page.
    *
-   * @param string $callsign
-   *   Callsign
-   *
    * @return array
    *   Render array
    */
-  public function hamNeighbors($callsign = NULL) {
-    $callsign = strtoupper(trim($callsign));
-
+  public function hamNeighbors() {
     /** @var HamNeighborsService $service */
     $service = \Drupal::service('ham_station.ham_neighbors');
 
-    return $service->render($callsign);
+    return $service->render();
   }
 
   public function hamMapAjax(Request $request) {

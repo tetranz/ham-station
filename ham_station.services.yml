@@ -31,9 +31,6 @@ services:
     arguments:
       - '@form_builder'
       - '@entity_type.manager'
-      - '@renderer'
-      - '@ham_station.report_service'
-      - '@ham_station.grid_calculator'
 
   ham_station.distance_service:
     class: Drupal\ham_station\DistanceService

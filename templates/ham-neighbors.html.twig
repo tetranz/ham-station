@@ -2,8 +2,5 @@
   <div class="info-block-1">{{ info_blocks[1]|raw }}</div>
   {{ form }}
   <div class="info-block-2"{% if not view %} style="display: none;"{% endif %}>{{ info_blocks[2]|raw }}</div>
-  <p class="message"{% if not message %} style="display: none;"{% endif %}>{{ message }}</p>
-  <h2 class="results-title"{% if not view %} style="display: none;"{% endif %}><span class="callsign">{% if query_type == 0 %}Callsign{% else %}Gridsquare{% endif %} {{ query }}</span> and neighbors</h2>
   <div class="map-container" style="display: none;"></div>
-  <div class="view-container">{{ view }}</div>
 </div>

@@ -10,7 +10,7 @@ ham_station.ham_neighbors:
   path: '/neighbors/{callsign}'
   defaults:
     _controller: '\Drupal\ham_station\Controller\DefaultController::hamNeighbors'
-    _title: 'Ham Neighbors'
+    _title: 'Amateur Radio License Map'
     callsign: null
   requirements:
     _permission: 'access content'
