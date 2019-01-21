@@ -10,6 +10,9 @@ const hamstationApp = (function ($) {
     let markers = [];
     let activeInfoWindow = null;
     let txtOverlay;
+    let mapCenterChangedListener = null;
+    let mapCenterChangedStatus = false;
+
     let gridKeys = ['center', 'northWest', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west'];
 
     function selectQueryType(queryType) {
@@ -36,8 +39,13 @@ const hamstationApp = (function ($) {
         });
 
         $('.map-container').show();
-        map.addListener('click', function () {
-          console.log('aaa');
+        map.addListener('center_changed', function () {
+          if (mapCenterChangedStatus === 1) {
+            mapCenterChangedListener(map.getCenter());
+          }
+          else if (mapCenterChangedStatus === 2) {
+            mapCenterChangedStatus = 1;
+          }
         });
       }
       else {
@@ -234,6 +242,8 @@ const hamstationApp = (function ($) {
       setMapData: md => mapData = md,
       selectQueryType: selectQueryType,
       showMap: showMap,
+      setMapCenterChanged: f => mapCenterChangedListener = f,
+      setMapCenterChangedStatus: v => mapCenterChangedStatus = v,
       drawGridsquares: drawGridsquares,
       writeGridLabels: writeGridlabels,
       drawMakers: drawMarkers,
@@ -245,6 +255,7 @@ const hamstationApp = (function ($) {
   // ----- Main controller -----
   const controller = (function (uiCtrl) {
     let context;
+    let center_moved_timer_id = null;
 
     let setupEventListeners = () => {
       $('input[type=radio][name=query_type]', context).change(e => {
@@ -259,6 +270,13 @@ const hamstationApp = (function ($) {
           return;
         }
 
+        mapDataRequest(query);
+        uiCtrl.setMapCenterChangedStatus(1);
+      });
+
+      function mapDataRequest(query) {
+        let showGrid = document.getElementById('edit-show-gridlabels').checked;
+
         $.post('/ham-map-ajax',
           query,
           (data) => {
@@ -269,17 +287,30 @@ const hamstationApp = (function ($) {
             uiCtrl.showError('');
             uiCtrl.setMapData(data);
             uiCtrl.showMap();
-            uiCtrl.drawGridsquares(true);
-            uiCtrl.writeGridLabels(true);
+            uiCtrl.drawGridsquares(showGrid);
+            uiCtrl.writeGridLabels(showGrid);
             uiCtrl.drawMakers(true);
           }
         );
-      });
+      }
+
+      function mapCenterChanged(location) {
+        if (center_moved_timer_id) {
+          clearTimeout(center_moved_timer_id);
+        }
+
+        center_moved_timer_id = setTimeout(location => {
+          uiCtrl.setMapCenterChangedStatus(2);
+          mapDataRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`});
+        }, 2000, location);
+      }
 
       $('#edit-show-gridlabels').click(e => {
         uiCtrl.drawGridsquares(e.target.checked);
         uiCtrl.writeGridLabels(e.target.checked);
       });
+
+      uiCtrl.setMapCenterChanged(mapCenterChanged);
     };
 
     function getAndFormatQuery() {

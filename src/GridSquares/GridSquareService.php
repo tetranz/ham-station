@@ -82,6 +82,12 @@ class GridSquareService {
     if ($query_type === 'z') {
       return $this->getMapDataByZipCode($query_value);
     }
+
+    if ($query_type == 'latlng') {
+      $parts = explode(',', $query_value);
+
+      return $this->getMapDataCentered((float) $parts[0], (float) $parts[1]);
+    }
   }
 
   private function getMapDataByCallsign($callsign) {
