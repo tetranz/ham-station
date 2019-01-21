@@ -11,7 +11,6 @@ const hamstationApp = (function ($) {
     let activeInfoWindow = null;
     let txtOverlay;
     let mapCenterChangedListener = null;
-    let mapCenterChangedStatus = false;
 
     let gridKeys = ['center', 'northWest', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west'];
 
@@ -26,31 +25,24 @@ const hamstationApp = (function ($) {
       document.querySelector('.ham-map-form .query-input .description').innerHTML = labels[queryType][1];
     }
 
-    function showMap() {
-      let center = {lat: mapData.mapCenterLat, lng: mapData.mapCenterLng};
+    function createMap(mapCenterChangedListener) {
+      if (map) {
+        return;
+      }
+
       let map_container = document.querySelector('.map-container');
 
-      clearMap();
+      map = new google.maps.Map(map_container, {
+        zoom: 14
+      });
 
-      if (!map) {
-        map = new google.maps.Map(map_container, {
-          zoom: 14,
-          center: center
-        });
+      map.addListener('center_changed', function () {
+        mapCenterChangedListener(map.getCenter());
+      });
+    }
 
-        $('.map-container').show();
-        map.addListener('center_changed', function () {
-          if (mapCenterChangedStatus === 1) {
-            mapCenterChangedListener(map.getCenter());
-          }
-          else if (mapCenterChangedStatus === 2) {
-            mapCenterChangedStatus = 1;
-          }
-        });
-      }
-      else {
-        map.setCenter(center);
-      }
+    function setMapCenter() {
+      map.setCenter({lat: mapData.mapCenterLat, lng: mapData.mapCenterLng});
     }
 
     function clearMap() {
@@ -241,9 +233,8 @@ const hamstationApp = (function ($) {
       init: txtOl => txtOverlay = txtOl,
       setMapData: md => mapData = md,
       selectQueryType: selectQueryType,
-      showMap: showMap,
-      setMapCenterChanged: f => mapCenterChangedListener = f,
-      setMapCenterChangedStatus: v => mapCenterChangedStatus = v,
+      createMap: createMap,
+      setMapCenter: setMapCenter,
       drawGridsquares: drawGridsquares,
       writeGridLabels: writeGridlabels,
       drawMakers: drawMarkers,
@@ -256,6 +247,7 @@ const hamstationApp = (function ($) {
   const controller = (function (uiCtrl) {
     let context;
     let center_moved_timer_id = null;
+    let setCenterEnabled = false;
 
     let setupEventListeners = () => {
       $('input[type=radio][name=query_type]', context).change(e => {
@@ -270,11 +262,11 @@ const hamstationApp = (function ($) {
           return;
         }
 
-        mapDataRequest(query);
-        uiCtrl.setMapCenterChangedStatus(1);
+        setCenterEnabled = false;
+        mapDataRequest(query, true);
       });
 
-      function mapDataRequest(query) {
+      function mapDataRequest(query, setCenter) {
         let showGrid = document.getElementById('edit-show-gridlabels').checked;
 
         $.post('/ham-map-ajax',
@@ -284,12 +276,18 @@ const hamstationApp = (function ($) {
               uiCtrl.showError(data.error);
               return;
             }
+
             uiCtrl.showError('');
             uiCtrl.setMapData(data);
-            uiCtrl.showMap();
             uiCtrl.drawGridsquares(showGrid);
             uiCtrl.writeGridLabels(showGrid);
             uiCtrl.drawMakers(true);
+
+            if (setCenter) {
+              uiCtrl.setMapCenter();
+            }
+
+            $('.map-container').show();
           }
         );
       }
@@ -300,8 +298,12 @@ const hamstationApp = (function ($) {
         }
 
         center_moved_timer_id = setTimeout(location => {
-          uiCtrl.setMapCenterChangedStatus(2);
-          mapDataRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`});
+          if (setCenterEnabled) {
+            mapDataRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
+          }
+          else {
+            setCenterEnabled = true;
+          }
         }, 2000, location);
       }
 
@@ -310,7 +312,7 @@ const hamstationApp = (function ($) {
         uiCtrl.writeGridLabels(e.target.checked);
       });
 
-      uiCtrl.setMapCenterChanged(mapCenterChanged);
+      uiCtrl.createMap(mapCenterChanged);
     };
 
     function getAndFormatQuery() {
