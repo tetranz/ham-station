@@ -258,54 +258,27 @@ class GridSquareService {
   }
 
   private function callsignQuery($callsign) {
+    $query = $this->dbConnection->select('ham_station', 'hs');
+    $query->addJoin('INNER', 'ham_address', 'ha', 'ha.hash = hs.address_hash');
+    $query->addJoin('INNER', 'ham_location', 'hl', 'hl.id = ha.location_id');
+    $query->fields('hl', ['latitude', 'longitude']);
+    $query->condition('hs.callsign', $callsign);
 
-    $storage = $this->entityTypeManager->getStorage('ham_station');
-
-    $entity_ids = $storage
-      ->getQuery()
-      ->condition('callsign', $callsign)
-      ->execute();
+    $result = $query->execute()->fetch();
 
     $return = ['callsign' => $callsign];
 
-    if (empty($entity_ids)) {
-      return $return + [
-        'status' => static::QUERY_LOCATION_CALLSIGN_NOT_FOUND,
-        'error' => sprintf('Callsign %s was not found.', $callsign),
-      ];
-    }
-
-    /** @var HamStation $ham_station */
-    $ham_station = $storage->load(reset($entity_ids));
-
-    $storage = $this->entityTypeManager->getStorage('ham_address');
-
-    $entity_ids = $storage
-      ->getQuery()
-      ->condition('hash', $ham_station->get('address_hash')->value)
-      ->execute();
-
-    if (empty($entity_ids)) {
+    if ($result === FALSE) {
       return $return + [
         'status' => static::QUERY_LOCATION_CALLSIGN_NO_ADDRESS,
         'error' => sprintf('We were unable to geocode the location of callsign %s.', $callsign),
       ];
     }
 
-    /** @var HamAddress $ham_address */
-    $ham_address = $storage->load(reset($entity_ids));
-
-    if ($ham_address->get('geocode_status')->value != HamAddress::GEOCODE_STATUS_SUCCESS) {
-      return $return + [
-        'status' => static::QUERY_LOCATION_CALLSIGN_NO_GEO,
-        'error' => sprintf('We were unable to geocode the location of callsign %s.', $callsign),
-      ];
-    }
-
     return $return + [
       'status' => static::QUERY_LOCATION_CALLSIGN_SUCCESS,
-      'lat' => (float) $ham_address->get('latitude')->value,
-      'lng' => (float) $ham_address->get('longitude')->value
+      'lat' => (float) $result->latitude,
+      'lng' => (float) $result->longitude
     ];
   }
 
