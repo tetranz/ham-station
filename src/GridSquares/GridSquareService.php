@@ -7,6 +7,7 @@ use Drupal\ham_station\DistanceService;
 use Drupal\ham_station\Entity\HamAddress;
 use Drupal\ham_station\Entity\HamStation;
 use Drupal\ham_station\Geocodio;
+use Drupal\ham_station\GoogleGeocoder;
 
 /**
  * Service to provide subsquare calculations and factory.
@@ -54,20 +55,20 @@ class GridSquareService {
   private $distanceService;
 
   /**
-   * @var Geocodio
+   * @var GoogleGeocoder
    */
-  private $geocodio;
+  private $googleGeocoder;
 
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
     Connection $db_connection,
     DistanceService $distance_service,
-    Geocodio $geocodio
+    GoogleGeocoder $google_geocoder
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->dbConnection = $db_connection;
     $this->distanceService = $distance_service;
-    $this->geocodio = $geocodio;
+    $this->googleGeocoder = $google_geocoder;
   }
 
   public function mapQuery($query_type, $query_value) {
@@ -108,8 +109,8 @@ class GridSquareService {
   }
 
   private function getMapDataByZipCode($zipcode) {
-    $result = $this->geocodio->getPostalCode($zipcode);
-
+    $result = $this->googleGeocoder->geocodePostalCode($zipcode);
+    
     if (empty($result)) {
       $this->errorMessage = t('We can\'t find a location for that zip code.');
       return NULL;
