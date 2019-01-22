@@ -25,7 +25,7 @@ class DefaultController extends ControllerBase {
    * @return array
    *   Render array
    */
-  public function hamNeighbors() {
+  public function hamMap() {
     /** @var HamNeighborsService $service */
     $service = \Drupal::service('ham_station.ham_neighbors');
 

@@ -71,7 +71,7 @@ class HamMapForm extends FormBase {
       '#attributes' => ['class' => ['error-message', 'hidden']],
     ];
 
-    $form['submit'] = [
+    $col_right['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Show the map'),
       '#attributes' => ['class' => ['btn btn-primary']],

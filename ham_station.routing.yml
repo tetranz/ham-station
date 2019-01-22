@@ -6,10 +6,10 @@ ham_station.config:
   requirements:
     _permission: 'administer site configuration'
 
-ham_station.ham_neighbors:
-  path: '/neighbors/{callsign}'
+ham_station.ham_map:
+  path: '/map'
   defaults:
-    _controller: '\Drupal\ham_station\Controller\DefaultController::hamNeighbors'
+    _controller: '\Drupal\ham_station\Controller\DefaultController::hamMap'
     _title: 'Amateur Radio License Map'
     callsign: null
   requirements:
