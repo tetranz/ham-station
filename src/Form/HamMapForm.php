@@ -40,6 +40,7 @@ class HamMapForm extends FormBase {
         'c' => 'Callsign',
         'g' => 'Grid square',
         'z' => 'Zip code',
+        'a' => 'Street address',
       ],
       '#default_value' => 'c',
     ];
@@ -55,7 +56,14 @@ class HamMapForm extends FormBase {
       '#type' => 'textfield',
       '#title' => t('Callsign'),
       '#description' => t('Enter a callsign.'),
-      '#wrapper_attributes' => ['class' => ['query-input']],
+      '#wrapper_attributes' => ['class' => ['query-other']],
+    ];
+
+    $col_right['address'] = [
+      '#type' => 'textfield',
+      '#title' => t('Street address'),
+      '#description' => t('Enter / select a street address.'),
+      '#wrapper_attributes' => ['class' => ['query-address hidden']],
     ];
 
     $col_right['error'] = [

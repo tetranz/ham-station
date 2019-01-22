@@ -22,8 +22,16 @@ const hamstationApp = (function ($) {
         z:['Zip code', 'Enter a five digit zip code.']
       };
 
-      document.querySelector('.ham-map-form .query-input label').innerHTML = labels[queryType][0];
-      document.querySelector('.ham-map-form .query-input .description').innerHTML = labels[queryType][1];
+      if ('cgz'.indexOf(queryType) > -1) {
+        document.querySelector('.ham-map-form .query-other label').innerHTML = labels[queryType][0];
+        document.querySelector('.ham-map-form .query-other .description').innerHTML = labels[queryType][1];
+        document.querySelector('.ham-map-form .query-other').classList.remove('hidden');
+        document.querySelector('.ham-map-form .query-address').classList.add('hidden');
+      }
+      else {
+        document.querySelector('.ham-map-form .query-other').classList.add('hidden');
+        document.querySelector('.ham-map-form .query-address').classList.remove('hidden');
+      }
     }
 
     function createMap(mapCenterChangedListener) {
@@ -248,87 +256,54 @@ const hamstationApp = (function ($) {
     let context;
     let center_moved_timer_id = null;
     let setCenterEnabled = false;
+    let autocompleteLocation = null;
 
-    let setupEventListeners = () => {
-      $('input[type=radio][name=query_type]', context).change(e => {
-        uiCtrl.selectQueryType(e.target.value);
-      });
+    function mapDataRequest(query, setCenter) {
+      let showGrid = document.getElementById('edit-show-gridlabels').checked;
 
-      $('#edit-submit', context).click(e => {
-        e.preventDefault();
+      $.post('/ham-map-ajax',
+        query,
+        (data) => {
+          if (data.hasOwnProperty('error')) {
+            uiCtrl.showError(data.error);
+            return;
+          }
 
-        let query = getAndFormatQuery();
-        if (!query) {
-          return;
+          uiCtrl.showError('');
+          uiCtrl.setMapData(data);
+          uiCtrl.drawGridsquares(showGrid);
+          uiCtrl.writeGridLabels(showGrid);
+          uiCtrl.drawMarkers();
+
+          if (setCenter) {
+            uiCtrl.setMapCenter();
+          }
+
+          $('.map-container').show();
         }
-
-        setCenterEnabled = false;
-        mapDataRequest(query, true);
-      });
-
-      function mapDataRequest(query, setCenter) {
-        let showGrid = document.getElementById('edit-show-gridlabels').checked;
-
-        $.post('/ham-map-ajax',
-          query,
-          (data) => {
-            if (data.hasOwnProperty('error')) {
-              uiCtrl.showError(data.error);
-              return;
-            }
-
-            uiCtrl.showError('');
-            uiCtrl.setMapData(data);
-            uiCtrl.drawGridsquares(showGrid);
-            uiCtrl.writeGridLabels(showGrid);
-            uiCtrl.drawMarkers();
-
-            if (setCenter) {
-              uiCtrl.setMapCenter();
-            }
-
-            $('.map-container').show();
-          }
-        );
-      }
-
-      function mapCenterChanged(location) {
-        if (center_moved_timer_id) {
-          clearTimeout(center_moved_timer_id);
-        }
-
-        center_moved_timer_id = setTimeout(location => {
-          if (setCenterEnabled) {
-            mapDataRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
-          }
-          else {
-            setCenterEnabled = true;
-          }
-        }, 2000, location);
-      }
-
-      $('#edit-show-gridlabels').click(e => {
-        uiCtrl.drawGridsquares(e.target.checked);
-        uiCtrl.writeGridLabels(e.target.checked);
-      });
-
-      uiCtrl.createMap(mapCenterChanged);
-    };
+      );
+    }
 
     function getAndFormatQuery() {
       let queryType = document.querySelector('input[type=radio][name=query_type]:checked').value;
-      let valueElement = document.getElementById('edit-query');
 
-      if (queryType == 'c') {
-        return getCallsignQuery(valueElement);
+      if ('cgz'.indexOf(queryType) > 1) {
+        let valueElement = document.getElementById('edit-query');
+
+        if (queryType == 'c') {
+          return getCallsignQuery(valueElement);
+        }
+
+        if (queryType == 'g') {
+          return getGridsquareQuery(valueElement);
+        }
+
+        if (queryType == 'z') {
+          return getZipcodeQuery(valueElement);
+        }
       }
-
-      if (queryType == 'g') {
-        return getGridsquareQuery(valueElement);
-      }
-
-      if (queryType == 'z') {
-        return getZipcodeQuery(valueElement);
+      else if (queryType == 'a') {
+        return getAddressQuery();
       }
     }
 
@@ -367,11 +342,69 @@ const hamstationApp = (function ($) {
       return {queryType:'z', value:value};
     }
 
+    function getAddressQuery() {
+      return {queryType:'latlng', value:`${autocompleteLocation.lat()},${autocompleteLocation.lng()}}`}
+    }
+
+      let setupEventListeners = () => {
+      $('input[type=radio][name=query_type]', context).change(e => {
+        uiCtrl.selectQueryType(e.target.value);
+      });
+
+      $('#edit-submit', context).click(e => {
+        e.preventDefault();
+
+        let query = getAndFormatQuery();
+        if (!query) {
+          return;
+        }
+
+        setCenterEnabled = false;
+        mapDataRequest(query, true);
+      });
+
+      function mapCenterChanged(location) {
+        if (center_moved_timer_id) {
+          clearTimeout(center_moved_timer_id);
+        }
+
+        center_moved_timer_id = setTimeout(location => {
+          if (setCenterEnabled) {
+            mapDataRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
+          }
+          else {
+            setCenterEnabled = true;
+          }
+        }, 2000, location);
+      }
+
+      $('#edit-show-gridlabels').click(e => {
+        uiCtrl.drawGridsquares(e.target.checked);
+        uiCtrl.writeGridLabels(e.target.checked);
+      });
+
+      uiCtrl.createMap(mapCenterChanged);
+    };
+
+    function setupAutocomplete() {
+      let autocomplete = new google.maps.places.Autocomplete(
+        document.getElementById('edit-address')
+      );
+
+      autocomplete.setFields(['geometry.location']);
+
+      autocomplete.addListener('place_changed', () => {
+        let place = autocomplete.getPlace();
+        autocompleteLocation = place.geometry.location;
+      });
+    }
+
     return {
       'init': (ctx, txtOl) => {
         context = ctx;
         uiCtrl.init(txtOl);
         setupEventListeners();
+        setupAutocomplete();
       }
     };
   })(uiController);
