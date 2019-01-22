@@ -287,7 +287,7 @@ const hamstationApp = (function ($) {
     function getAndFormatQuery() {
       let queryType = document.querySelector('input[type=radio][name=query_type]:checked').value;
 
-      if ('cgz'.indexOf(queryType) > 1) {
+      if ('cgz'.indexOf(queryType) > -1) {
         let valueElement = document.getElementById('edit-query');
 
         if (queryType == 'c') {
