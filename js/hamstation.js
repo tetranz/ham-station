@@ -171,7 +171,8 @@ const hamstationApp = (function ($) {
           classes.push('multi');
         }
         let infowindow = new google.maps.InfoWindow({
-          content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`
+          content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
+          zIndex: 99
         });
 
         infowindow.open(map, marker);
