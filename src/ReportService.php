@@ -53,12 +53,13 @@ class ReportService {
     }
 
     // Generate a geocode status report by state.
-    $query = $this->dbConnection->select('ham_station', 'hs');
-    $query->addField('hs', 'address__administrative_area', 'state');
-    $query->addField('hs', 'geocode_status', 'status');
+    $query = $this->dbConnection->select('ham_address', 'ha');
+    $query->addField('ha', 'address__administrative_area', 'state');
+    $query->addField('ha', 'geocode_status', 'status');
     $query->addExpression('COUNT(*)', 'count');
-    $query->condition('address__administrative_area', '', '>');
-    $query->groupBy('hs.address__administrative_area, hs.geocode_status');
+    $query->condition('ha.address__administrative_area', '', '>');
+    $query->condition('ha.address__administrative_area', ['AA', 'AE'], 'NOT IN');
+    $query->groupBy('ha.address__administrative_area, ha.geocode_status');
     $rows = $query->execute();
 
     $totals = [0, 0, 0, 0];

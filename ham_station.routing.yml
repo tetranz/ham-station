@@ -39,7 +39,7 @@ ham_station.states_done_ajax:
     _permission: 'access content'
 
 ham_station.geocode_report_ajax:
-  path: '/neighbors-ajax/geocode-report-ajax'
+  path: '/ham-map/geocode-report-ajax'
   defaults:
     _controller: '\Drupal\ham_station\Controller\DefaultController::geocodeReportAjax'
   requirements:

@@ -9,11 +9,11 @@ use Drupal\ham_station\ReportService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a HamNeighborsReport block.
+ * Provides a Ham map report block.
  *
  * @Block(
- *  id = "ham_neighbors_report",
- *  admin_label = @Translation("Ham neighbors report"),
+ *  id = "ham_map_report",
+ *  admin_label = @Translation("Ham map report"),
  * )
  */
 class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInterface {
@@ -63,9 +63,9 @@ class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInte
   public function build() {
     // Report content is requested via ajax so we can use the anonymous page cache.
     return [
-      '#markup' => '<div class="ham-neighbors-geocode-report"></div>',
+      '#markup' => '<div class="ham-map-report"></div>',
       '#attached' => [
-        'library' => ['ham_station/neighbors'],
+        'library' => ['ham_station/map_report'],
         'drupalSettings' => [
           'ham_neighbors' => [
             'status' => 0,
