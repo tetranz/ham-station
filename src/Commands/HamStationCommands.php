@@ -40,6 +40,19 @@ class HamStationCommands extends DrushCommands {
   }
 
   /**
+   * Import new addresses from fcc_ham_data module.
+   *
+   * @usage ham_station:import-fcc-new-addresses
+   *   Usage Import new addresses from fcc_ham_data module.
+   *
+   * @command ham_station:import-fcc-new-addresses
+   * @aliases hsifccna
+   */
+  public function importFccNewAddresses() {
+    $this->fccImporter->importNewAddresses([$this->io(), 'writeln']);
+  }
+
+  /**
    * Import new licenses from fcc_ham_data module.
    *
    * @usage ham_station:import-fcc-new
@@ -56,13 +69,52 @@ class HamStationCommands extends DrushCommands {
    * Update existing licenses from fcc_ham_data module.
    *
    * @usage ham_station:import-fcc-update
-   *   Usage existing licenses from fcc_ham_data module.
+   *   Usage Update existing licenses from fcc_ham_data module.
    *
    * @command ham_station:import-fcc-update
    * @aliases hsifccu
    */
   public function importFccUpdate() {
     $this->fccImporter->updateLicenses([$this->io(), 'writeln']);
+  }
+
+  /**
+   * Delete inactive stations from fcc_ham_data module.
+   *
+   * @usage ham_station:delete-fcc-inactive
+   *   Usage Delete inactive licenses from fcc_ham_data module.
+   *
+   * @command ham_station:delete-fcc-inactive
+   * @aliases hsifccd
+   */
+  public function importFccDeleteInactive() {
+    $this->fccImporter->deleteInactiveStations([$this->io(), 'writeln']);
+  }
+
+  /**
+   * Delete inactive addresses from fcc_ham_data module.
+   *
+   * @usage ham_station:delete-fcc-inactive-addresses
+   *   Usage Delete inactive addresses from fcc_ham_data module.
+   *
+   * @command ham_station:delete-fcc-inactive-addresses
+   * @aliases hsifccda
+   */
+  public function importFccDeleteInactiveAddresses() {
+    $this->fccImporter->deleteInactiveAddresses([$this->io(), 'writeln']);
+  }
+
+  /**
+   * Delete inactive locations from fcc_ham_data module.
+   *
+   * @usage ham_station:delete-fcc-inactive-locations
+   *   Usage Delete inactive locations from fcc_ham_data module.
+   *
+   * @command ham_station:delete-fcc-inactive-locations
+   * @aliases hsifccdl
+   */
+  public function importFccDeleteInactiveLocations() {
+    $this->fccImporter->deleteInactiveLocations([$this->io(), 'writeln']);
   }
 
   /**

@@ -52,21 +52,17 @@ class FccImporter {
     $sql = '
     INSERT INTO {ham_station}
     (uuid, langcode, callsign, first_name, middle_name, last_name, suffix,
-    address__address_line1, address__locality, address__administrative_area, address__postal_code, address__country_code,
-    organization, operator_class, previous_callsign, address_type, geocode_status, total_hash, address_hash,
-    user_id, status, created, changed
-    )
-    SELECT uuid(), \'en\', hd.call_sign AS callsign, en.first_name, en.mi AS middle_name, en.last_name, en.suffix,
-    en.street_address AS address__address_line1, en.city AS address__locality, en.state AS address__administrative_area,
-    en.zip_code AS address__postal_code, \'US\' AS address__country_code,
+    organization, operator_class, previous_callsign, total_hash, address_hash,
+    user_id, status, created, changed)
+    SELECT uuid() AS uuid, \'en\' AS langcode, hd.call_sign AS callsign, en.first_name, en.mi AS middle_name, en.last_name, en.suffix,
     CASE WHEN applicant_type_code != \'I\' THEN en.entity_name ELSE NULL END AS organization, 
-    am.operator_class, am.previous_callsign, 0 AS address_type, 0 AS geocode_status, hd.total_hash, en.address_hash,
-    1 AS user_id, 1 AS status, unix_timestamp() AS created, unix_timestamp() AS changed
+    am.operator_class, am.previous_callsign, hd.total_hash, en.address_hash,
+    1 AS user_id, 1 AS status, unix_timestamp() AS created, unix_timestamp() AS changed    
     FROM {fcc_license_hd} hd
     INNER JOIN {fcc_license_en} en ON en.unique_system_identifier = hd.unique_system_identifier
     INNER JOIN {fcc_license_am} am ON am.unique_system_identifier = hd.unique_system_identifier
-    LEFT JOIN {ham_station} hs ON hs.callsign = hd.call_sign
-    WHERE hd.license_status = \'A\' AND hs.callsign IS NULL';
+    WHERE hd.license_status = \'A\'
+    AND NOT EXISTS (SELECT id FROM {ham_station} hs WHERE hs.callsign = hd.call_sign)';
 
     $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
 
@@ -85,8 +81,7 @@ class FccImporter {
    *   Optional callable used to report progress.
    */
   public function updateLicenses(callable $callback = NULL) {
-    // Update existing callsigns. Geolocation status is only changed if the
-    // address has changed.
+    // Update existing callsigns.
     $sql = '
     UPDATE {ham_station} hs
     INNER JOIN {fcc_license_hd} hd ON hd.call_sign = hs.callsign
@@ -97,23 +92,120 @@ class FccImporter {
     hs.middle_name = en.mi,
     hs.last_name = en.last_name,
     hs.suffix = en.suffix,
-    hs.address__address_line1 = en.street_address,
-    hs.address__locality = en.city,
-    hs.address__administrative_area = en.state,
-    hs.address__postal_code = en.zip_code,
     hs.organization = CASE WHEN applicant_type_code != \'I\' THEN en.entity_name ELSE NULL END,
     hs.operator_class = am.operator_class,
     hs.previous_callsign = am.previous_callsign,
-    hs.address_type = hs.address_type,
-    hs.geocode_status = CASE WHEN hs.address_hash != en.address_hash THEN 0 ELSE hs.geocode_status END,
     hs.total_hash = hd.total_hash,
     hs.address_hash = en.address_hash,
     hs.changed = unix_timestamp()
-    WHERE hd.license_status = \'A\' AND hd.total_hash != hs.total_hash';
+    WHERE hd.license_status = \'A\'';
 
     $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
 
     $msg = sprintf('%s existing FCC licenses updated.', $row_count);
+    $this->logger->info($msg);
+
+    if ($callback !== NULL) {
+      $callback($msg);
+    }
+  }
+
+  /**
+   * Import new FCC addresses.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
+  public function importNewAddresses(callable $callback) {
+    $sql = '
+    INSERT INTO {ham_address}
+    (uuid, langcode, hash,
+    address__address_line1, address__locality, address__administrative_area,
+    address__postal_code, address__country_code, address_type, geocode_status,
+    user_id, status, created, changed)
+    SELECT UUID() AS uuid, \'en\' AS langcode, address_hash as hash,
+    en.street_address AS address__address_line1, en.city AS address__locality, en.state AS address__administrative_area,
+    en.zip_code AS address__postal_code, \'US\' AS address__country_code,
+    0 AS address_type, 0 AS geocode_status,
+    1 AS user_id, 1 AS status, unix_timestamp() AS created, unix_timestamp() AS changed
+    FROM {fcc_license_en} en
+    INNER JOIN {fcc_license_hd} hd ON hd.unique_system_identifier = en.unique_system_identifier AND hd.license_status = \'A\'
+    WHERE NOT EXISTS (SELECT id FROM {ham_address} ha WHERE ha.hash = en.address_hash)
+    AND en.unique_system_identifier = (
+    SELECT MIN(en2.unique_system_identifier) FROM {fcc_license_en} en2 WHERE en2.address_hash = en.address_hash)';
+
+    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+
+    $msg = sprintf('%s new FCC addresses imported.', $row_count);
+    $this->logger->info($msg);
+
+    if ($callback !== NULL) {
+      $callback($msg);
+    }
+  }
+
+  /**
+   * Delete inactive FCC licenses.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
+  public function deleteInactiveStations(callable $callback) {
+    $sql = '
+    DELETE ham_station
+    FROM ham_station
+    LEFT JOIN fcc_license_hd hd ON hd.call_sign = ham_station.callsign AND hd.license_status = \'A\'
+    WHERE hd.unique_system_identifier IS NULL';
+
+    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+
+    $msg = sprintf('%s inactive FCC stations deleted.', $row_count);
+    $this->logger->info($msg);
+
+    if ($callback !== NULL) {
+      $callback($msg);
+    }
+  }
+
+  /**
+   * Delete inactive FCC addresses.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
+  public function deleteInactiveAddresses(callable $callback) {
+    $sql = '
+    DELETE ham_address
+    FROM ham_address
+    LEFT JOIN ham_station hs ON hs.address_hash = ham_address.hash
+    WHERE hs.id IS NULL';
+
+    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+
+    $msg = sprintf('%s inactive FCC addresses deleted.', $row_count);
+    $this->logger->info($msg);
+
+    if ($callback !== NULL) {
+      $callback($msg);
+    }
+  }
+
+  /**
+   * Delete inactive FCC locations.
+   *
+   * @param callable $callback
+   *   Optional callable used to report progress.
+   */
+  public function deleteInactiveLocations(callable $callback) {
+    $sql = '
+    DELETE ham_location
+    FROM ham_location
+    LEFT JOIN ham_address ha ON ha.location_id = ham_location.id
+    WHERE ha.id IS NULL';
+
+    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+
+    $msg = sprintf('%s inactive FCC locations deleted.', $row_count);
     $this->logger->info($msg);
 
     if ($callback !== NULL) {

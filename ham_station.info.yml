@@ -6,4 +6,3 @@ package: 'Custom'
 
 dependencies:
   - address
-  - fcc_ham_data
