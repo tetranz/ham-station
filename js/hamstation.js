@@ -360,9 +360,11 @@ const hamstationApp = (function ($) {
           return;
         }
 
+        let path = '/map';
         if ('cgz'.indexOf(query.queryType) > -1) {
-          window.history.pushState({}, null, `/map/${query.queryType}/${query.value}`);
+          path += `/${query.queryType}/${query.value}`;
         }
+        window.history.pushState({}, null, path);
 
         setCenterEnabled = false;
         mapDataRequest(query, true);
@@ -507,18 +509,18 @@ let txtOverlayLib = function () {
   let onRemove = function() {
     this.div_.parentNode.removeChild(this.div_);
     this.div_ = null;
-  }
+  };
   let hide = function() {
     if (this.div_) {
       this.div_.style.visibility = "hidden";
     }
-  }
+  };
 
   let show = function() {
     if (this.div_) {
       this.div_.style.visibility = "visible";
     }
-  }
+  };
 
   let toggle = function() {
     if (this.div_) {
@@ -528,7 +530,7 @@ let txtOverlayLib = function () {
         this.hide();
       }
     }
-  }
+  };
 
   let toggleDOM = function() {
     if (this.getMap()) {
@@ -536,7 +538,7 @@ let txtOverlayLib = function () {
     } else {
       this.setMap(this.map_);
     }
-  }
+  };
 
   return {
     init: () => {
