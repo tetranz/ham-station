@@ -20,16 +20,20 @@ use Symfony\Component\Serializer\Serializer;
 class DefaultController extends ControllerBase {
 
   /**
-   * Ham neighbors page.
+   * Ham map page.
+   *
+   * @param string $query_type|null
+   *   Initial query type.
+   * @param string $query_value|null
+   *   Initial query value.
    *
    * @return array
-   *   Render array
    */
-  public function hamMap() {
+  public function hamMap($query_type, $query_value) {
     /** @var HamNeighborsService $service */
     $service = \Drupal::service('ham_station.ham_neighbors');
 
-    return $service->render();
+    return $service->render($query_type, $query_value);
   }
 
   public function hamMapAjax(Request $request) {

@@ -360,6 +360,10 @@ const hamstationApp = (function ($) {
           return;
         }
 
+        if ('cgz'.indexOf(query.queryType) > -1) {
+          window.history.pushState({}, null, `/map/${query.queryType}/${query.value}`);
+        }
+
         setCenterEnabled = false;
         mapDataRequest(query, true);
       });
@@ -400,12 +404,34 @@ const hamstationApp = (function ($) {
       });
     }
 
+    function initialQuery(hs_settings) {
+      if (!hs_settings.query_type || !hs_settings.query_value) {
+        return;
+      }
+
+      if ('cgz'.indexOf(hs_settings.query_type) < 0) {
+        return;
+      }
+
+      document.querySelector('input[type=radio][name=query_type][value=' + hs_settings.query_type + ']').checked = true;
+      document.getElementById('edit-query').value = hs_settings.query_value;
+
+      let query = getAndFormatQuery();
+      if (!query) {
+        return;
+      }
+
+      setCenterEnabled = false;
+      mapDataRequest(query, true);
+    }
+
     return {
-      'init': (ctx, txtOl) => {
+      'init': (ctx, txtOl, hs_settings) => {
         context = ctx;
         uiCtrl.init(txtOl);
         setupEventListeners();
         setupAutocomplete();
+        initialQuery(hs_settings)
       }
     };
   })(uiController);
@@ -530,7 +556,7 @@ let txtOverlayLib = function () {
   Drupal.behaviors.hamstation = {
     attach: (context, settings) => {
       txtOverlayLib.init();
-      hamstationApp.init(context, txtOverlayLib.txtOverlay);
+      hamstationApp.init(context, txtOverlayLib.txtOverlay, settings.ham_station);
     }
   };
 })(Drupal);

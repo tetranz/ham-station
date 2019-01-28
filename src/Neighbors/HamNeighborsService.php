@@ -54,12 +54,16 @@ class HamNeighborsService {
   }
 
   /**
-   * Generate the render array for the neighbors.
+   * Generate the render array for the map page.
+   *
+   * @param string $query_type|null
+   *   Initial query type.
+   * @param string $query_value|null
+   *   Initial query value.
    *
    * @return array
-   *   Render array.
    */
-  public function render() {
+  public function render($query_type, $query_value) {
     $form = $this->formBuilder->getForm(HamMapForm::class);
 
     $block_ids = $this->blockContentStorage->getQuery()
@@ -79,6 +83,9 @@ class HamNeighborsService {
       '#info_blocks' => $info_blocks,
       '#attached' => [
         'library' => ['ham_station/neighbors'],
+        'drupalSettings' => [
+          'ham_station' => ['query_type' => $query_type, 'query_value' => $query_value],
+        ]
       ],
     ];
   }

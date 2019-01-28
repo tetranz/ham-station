@@ -7,11 +7,12 @@ ham_station.config:
     _permission: 'administer site configuration'
 
 ham_station.ham_map:
-  path: '/map'
+  path: '/map/{query_type}/{query_value}'
   defaults:
     _controller: '\Drupal\ham_station\Controller\DefaultController::hamMap'
     _title: 'Amateur Radio License Map'
-    callsign: null
+    query_type: null
+    query_value: null
   requirements:
     _permission: 'access content'
 
