@@ -393,6 +393,17 @@ const hamstationApp = (function ($) {
       uiCtrl.createMap(mapCenterChanged);
     };
 
+    function gridLabelClick(e) {
+      let gridsquare = e.target.dataset.grid;
+
+      document.querySelector('input[type=radio][name=query_type][value=g]').checked = true;
+      document.getElementById('edit-query').value = gridsquare;
+
+      window.history.pushState({}, null, `/map/g/${gridsquare}`);
+      setCenterEnabled = false;
+      mapDataRequest({queryType:'latlng', value: e.target.dataset.pos}, true);
+    }
+
     function setupAutocomplete() {
       let autocomplete = new google.maps.places.Autocomplete(
         document.getElementById('edit-address')
@@ -428,9 +439,10 @@ const hamstationApp = (function ($) {
     }
 
     return {
-      'init': (ctx, txtOl, hs_settings) => {
+      'init': (ctx, txtlib, hs_settings) => {
+        txtlib.init(gridLabelClick);
         context = ctx;
-        uiCtrl.init(txtOl);
+        uiCtrl.init(txtlib.txtOverlay);
         setupEventListeners();
         setupAutocomplete();
         initialQuery(hs_settings)
@@ -444,7 +456,9 @@ const hamstationApp = (function ($) {
 
 })(jQuery);
 
-let txtOverlayLib = function () {
+let txtOverlayLib = function() {
+
+  var clickListener = null;
 
   var TxtOverlay = function(lat, lng, txt, cls, map) {
 
@@ -475,8 +489,12 @@ let txtOverlayLib = function () {
     // Create the DIV and set some basic attributes.
     var div = document.createElement('DIV');
     div.className = this.cls_;
-
     div.innerHTML = this.txt_;
+
+    div.dataset.grid = this.txt_
+    div.dataset.pos = `${this.pos.lat()},${this.pos.lng()}`;
+
+    div.addEventListener('click', clickListener);
 
     // Set the overlay's div_ property to this DIV
     this.div_ = div;
@@ -541,7 +559,7 @@ let txtOverlayLib = function () {
   };
 
   return {
-    init: () => {
+    init: (cllist) => {
       TxtOverlay.prototype = new google.maps.OverlayView();
       TxtOverlay.prototype.onAdd = onAdd;
       TxtOverlay.prototype.draw = draw;
@@ -549,6 +567,7 @@ let txtOverlayLib = function () {
       TxtOverlay.prototype.hide = hide;
       TxtOverlay.prototype.toggle = toggle;
       TxtOverlay.prototype.toggleDOM = toggleDOM;
+      clickListener = cllist;
     },
     txtOverlay: TxtOverlay
   }
@@ -557,8 +576,8 @@ let txtOverlayLib = function () {
 (function (Drupal) {
   Drupal.behaviors.hamstation = {
     attach: (context, settings) => {
-      txtOverlayLib.init();
-      hamstationApp.init(context, txtOverlayLib.txtOverlay, settings.ham_station);
+    //  txtOverlayLib.init();
+      hamstationApp.init(context, txtOverlayLib, settings.ham_station);
     }
   };
 })(Drupal);
