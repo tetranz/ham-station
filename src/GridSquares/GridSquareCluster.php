@@ -16,6 +16,7 @@ class GridSquareCluster {
   private $locations;
   private $mapCenterLat;
   private $mapCenterLng;
+  private $redrawLocationId = NULL;
 
   /**
    * GridSquareCluster constructor.
@@ -156,6 +157,14 @@ class GridSquareCluster {
 
   public function getLocations() {
     return $this->locations;
+  }
+
+  public function setRedrawLocationId($redraw_location_id) {
+    $this->redrawLocationId = $redraw_location_id;
+  }
+  
+  public function getRedrawLocationId() {
+    return $this->redrawLocationId;
   }
 
 }

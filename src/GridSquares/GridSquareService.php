@@ -123,7 +123,9 @@ class GridSquareService {
     $grid_cluster = $this->getClusterFromLatLng($lat, $lng);
     $grid_cluster->setMapCenterLat($lat);
     $grid_cluster->setMapCenterLng($lng);
-    $grid_cluster->setLocations($this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign));
+    list($locations, $redraw_location_id) = $this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign);
+    $grid_cluster->setLocations($locations);
+    $grid_cluster->setRedrawLocationId($redraw_location_id);
     return $grid_cluster;
   }
 
@@ -283,9 +285,7 @@ class GridSquareService {
     ];
   }
 
-  public function getStationsInRadius($lat, $lng, $radius, $units, $callsign) {
-    $st = microtime(true);
-
+  private function getStationsInRadius($lat, $lng, $radius, $units, $callsign) {
     $location_alias = 'hl';
     $distance_formula = $this->distanceService->getDistanceFormula($lat, $lng, $units, $location_alias);
     $box_formula = $this->distanceService->getBoundingBoxFormula($lat, $lng, $radius, $units, $location_alias);
@@ -364,6 +364,8 @@ class GridSquareService {
       }
     }
 
+    $redraw_location_id = NULL;
+
     if (!empty($callsign_idx)) {
       list($result_idx, $address_idx, $station_idx) = $callsign_idx;
 
@@ -371,10 +373,10 @@ class GridSquareService {
       $location = $result[$result_idx];
       $address = $location->moveAddressToTop($address_idx);
       $address->moveStationToTop($station_idx);
+      $redraw_location_id = $location->getId();
     }
 
-    $et = microtime(true) - $st;
-    return $result;
+    return [$result, $redraw_location_id];
   }
 
   public function getErrorMessage() {

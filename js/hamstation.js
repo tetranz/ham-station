@@ -118,11 +118,20 @@ const hamstationApp = (function ($) {
     }
 
     function drawMarkers() {
+
       for (var [id, marker] of markers) {
         if (!locationMap.has(id)) {
           marker.setMap(null);
           markers.delete(id);
         }
+      }
+
+      if (markers.has(mapData.redrawLocationId)) {
+        // Force the queried callsign to redraw in case we need to move a
+        // different call to the top of that location.
+        marker = markers.get(mapData.redrawLocationId)
+        marker.setMap(null);
+        markers.delete(mapData.redrawLocationId);
       }
 
       mapData.locations.forEach(location => {
