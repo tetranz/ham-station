@@ -126,19 +126,36 @@ const hamstationApp = (function ($) {
         }
       }
 
-      if (markers.has(mapData.redrawLocationId)) {
-        // Force the queried callsign to redraw in case we need to move a
-        // different call to the top of that location.
-        marker = markers.get(mapData.redrawLocationId)
-        marker.setMap(null);
-        markers.delete(mapData.redrawLocationId);
-      }
-
       mapData.locations.forEach(location => {
         if (!markers.has(location.id)) {
           drawMarker(location);
         }
       });
+
+      setQueryCallsignMarkerLabel();
+    }
+
+    // Set the label of the callsign we queried. We want the queried callsign to
+    // show even if it is not being redrawn.
+    function setQueryCallsignMarkerLabel() {
+      if (mapData.queryCallsignIdx === null) {
+        return;
+      }
+
+      let location = mapData.locations[mapData.queryCallsignIdx];
+      if (!markers.has(location.id)) {
+        return;
+      }
+
+      markers.get(location.id).setLabel(markerLabel(location));
+    }
+
+    function markerLabel(location) {
+      let stationCount = 0;
+      location.addresses.forEach(address => {
+        address.stations.forEach(station => stationCount++);
+      });
+      return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
     }
 
     function drawMarker(location) {
@@ -150,7 +167,7 @@ const hamstationApp = (function ($) {
       let marker = new google.maps.Marker({
         position: {lat: location.lat, lng: location.lng},
         map: map,
-        label: location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '')
+        label: markerLabel(location)
       });
 
       markers.set(location.id, marker);

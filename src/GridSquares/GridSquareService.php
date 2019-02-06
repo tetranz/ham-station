@@ -123,9 +123,9 @@ class GridSquareService {
     $grid_cluster = $this->getClusterFromLatLng($lat, $lng);
     $grid_cluster->setMapCenterLat($lat);
     $grid_cluster->setMapCenterLng($lng);
-    list($locations, $redraw_location_id) = $this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign);
+    list($locations, $query_callsign_idx) = $this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign);
     $grid_cluster->setLocations($locations);
-    $grid_cluster->setRedrawLocationId($redraw_location_id);
+    $grid_cluster->setQueryCallsignIdx($query_callsign_idx);
     return $grid_cluster;
   }
 
@@ -364,19 +364,21 @@ class GridSquareService {
       }
     }
 
-    $redraw_location_id = NULL;
+    $query_callsign_idx = NULL;
 
     if (!empty($callsign_idx)) {
+      // This puts the queried callsign on the marker label if there
+      // are more than one callsign at the location.
       list($result_idx, $address_idx, $station_idx) = $callsign_idx;
 
       /** @var HamLocationDTO $location */
       $location = $result[$result_idx];
       $address = $location->moveAddressToTop($address_idx);
       $address->moveStationToTop($station_idx);
-      $redraw_location_id = $location->getId();
+      $query_callsign_idx = $result_idx;
     }
 
-    return [$result, $redraw_location_id];
+    return [$result, $query_callsign_idx];
   }
 
   public function getErrorMessage() {

@@ -16,7 +16,7 @@ class GridSquareCluster {
   private $locations;
   private $mapCenterLat;
   private $mapCenterLng;
-  private $redrawLocationId = NULL;
+  private $queryCallsignIdx = NULL;
 
   /**
    * GridSquareCluster constructor.
@@ -159,12 +159,12 @@ class GridSquareCluster {
     return $this->locations;
   }
 
-  public function setRedrawLocationId($redraw_location_id) {
-    $this->redrawLocationId = $redraw_location_id;
+  public function setQueryCallsignIdx($query_callsign_idx) {
+    $this->queryCallsignIdx = $query_callsign_idx;
   }
   
-  public function getRedrawLocationId() {
-    return $this->redrawLocationId;
+  public function getQueryCallsignIdx() {
+    return $this->queryCallsignIdx;
   }
 
 }
