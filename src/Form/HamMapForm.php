@@ -77,10 +77,39 @@ class HamMapForm extends FormBase {
       '#attributes' => ['class' => ['btn btn-primary']],
     ];
 
-    $form['show_gridlabels'] = [
+    $form['row2'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['row']],
+    ];
+
+    $row2 = &$form['row2'];
+
+    $row2['col_left'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['col-md-3', 'no-bottom-margin']],
+    ];
+
+    $col_left = &$row2['col_left'];
+
+    $col_left['show_gridlabels'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show grid labels'),
       '#default_value' => TRUE,
+      '#wrapper_attributes' => ['class' => ['no-bottom-margin']],
+    ];
+
+    $row2['col_right'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['col-md-5']],
+    ];
+
+    $col_right = &$row2['col_right'];
+
+    $col_right['processing'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('Processing...'),
+      '#attributes' => ['class' => ['processing']],
     ];
 
     return $form;

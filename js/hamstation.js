@@ -287,6 +287,7 @@ const hamstationApp = (function ($) {
 
     function mapDataRequest(query, setCenter) {
       let showGrid = document.getElementById('edit-show-gridlabels').checked;
+      $('.processing').show();
 
       $.post('/ham-map-ajax',
         query,
@@ -308,7 +309,10 @@ const hamstationApp = (function ($) {
 
           $('.map-container').show();
         }
-      );
+      )
+      .always(() => {
+        $('.processing').hide();
+      });
     }
 
     function getAndFormatQuery() {
