@@ -2,13 +2,12 @@
 
 namespace Drupal\ham_station\Controller;
 
-use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\Query\Sql\Query;
 use Drupal\Core\Render\Renderer;
+use Drupal\ham_station\Form\HamMapForm;
 use Drupal\ham_station\GridSquares\GridSquareService;
-use Drupal\ham_station\Neighbors\HamNeighborsService;
-use Drupal\ham_station\QueryService;
+use Drupal\ham_station\ReportService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +17,50 @@ use Symfony\Component\Serializer\Serializer;
  * Class DefaultController.
  */
 class DefaultController extends ControllerBase {
+
+  /**
+   * @var GridSquareService
+   */
+  private $gridSquareService;
+
+  /**
+   * @var ReportService
+   */
+  private $reportService;
+
+  /**
+   * @var Serializer
+   */
+  private $serializer;
+
+  /**
+   * @var Renderer
+   */
+  private $renderer;
+
+  public function __construct(
+    GridSquareService $grid_square_service,
+    ReportService $report_service,
+    Serializer $serializer,
+    Renderer $renderer
+  ) {
+    $this->gridSquareService = $grid_square_service;
+    $this->reportService = $report_service;
+    $this->serializer = $serializer;
+    $this->renderer = $renderer;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('ham_station.gridsquare_service'),
+      $container->get('ham_station.report_service'),
+      $container->get('serializer'),
+      $container->get('renderer')
+    );
+  }
 
   /**
    * Ham map page.
@@ -30,76 +73,51 @@ class DefaultController extends ControllerBase {
    * @return array
    */
   public function hamMap($query_type, $query_value) {
-    /** @var HamNeighborsService $service */
-    $service = \Drupal::service('ham_station.ham_neighbors');
 
-    return $service->render($query_type, $query_value);
+    $block_content_storage = $this->entityTypeManager()->getStorage('block_content');
+
+    $block_ids = $block_content_storage->getQuery()
+      ->condition('info', 'neighbors-info-', 'STARTS_WITH')
+      ->execute();
+
+    $blocks = $block_content_storage->loadMultiple($block_ids);
+    $info_blocks = [];
+
+    foreach($blocks as $block) {
+      $info_blocks[substr($block->info->value, strlen('neighbors-info-'))] = $block->body->value;
+    }
+
+    return [
+      '#theme' => 'ham_neighbors',
+      '#form' => $this->formBuilder()->getForm(HamMapForm::class),
+      '#info_blocks' => $info_blocks,
+      '#attached' => [
+        'library' => ['ham_station/neighbors'],
+        'drupalSettings' => [
+          'ham_station' => ['query_type' => $query_type, 'query_value' => $query_value],
+        ]
+      ],
+    ];
   }
 
   public function hamMapAjax(Request $request) {
     $query_type = $request->get('queryType');
     $query_value = $request->get('value');
 
-    /** @var GridSquareService $service */
-    $service = \Drupal::service('ham_station.gridsquare_service');
-
-    $result = $service->mapQuery($query_type, $query_value);
+    $result = $this->gridSquareService->mapQuery($query_type, $query_value);
     if (empty($result)) {
       return new JsonResponse([
-        'error' => $service->getErrorMessage(),
+        'error' => $this->gridSquareService->getErrorMessage(),
       ]);
     }
 
-    /** @var Serializer $serializer */
-    $serializer = \Drupal::service('serializer');
-    $data = $serializer->serialize($result, 'json');
+    $data = $this->serializer->serialize($result, 'json');
 
     $response = new JsonResponse();
     $response->setJson($data);
 
     return $response;
   }
-
-  /**
-   * Ham neighbors ajax request.
-   *
-   * @param $callsign
-   *   Callsign.
-   *
-   * @return \Symfony\Component\HttpFoundation\Response
-   *   The response.
-   */
-  public function hamNeighborsAjax($callsign) {
-    $callsign = strtoupper(trim($callsign));
-
-    /** @var HamNeighborsService $service */
-    $service = \Drupal::service('ham_station.ham_neighbors');
-
-    return new Response(
-      $service->processSearchRequest($callsign)->responseString()
-    );
-  }
-
-  /**
-   * Get a list of states we've done and working on to display on page.
-   *
-   * Use ajax for this so can use the anonymous page cache.
-   *
-   * @return \Drupal\Core\Ajax\AjaxResponse
-   *   The response.
-   */
-  public function statesDoneAjax() {
-    /** @var \Drupal\ham_station\ReportService $reportService */
-    $reportService = \Drupal::service('ham_station.report_service');
-
-    $result = $reportService->geocodeStatus();
-    
-    return new AjaxResponse([
-      'done' => $result['done'],
-      'working_on' => $result['working_on'],
-    ]);
-  }
-
 
   /**
    * Get the geocode status report.
@@ -110,9 +128,7 @@ class DefaultController extends ControllerBase {
    *   The response.
    */
   public function geocodeReportAjax() {
-    /** @var \Drupal\ham_station\ReportService $reportService */
-    $reportService = \Drupal::service('ham_station.report_service');
-    $result = $reportService->geocodeStatus();
+    $result = $this->reportService->geocodeStatus();
 
     $render_array = [
       '#theme' => 'ham_neighbors_report',
@@ -121,11 +137,8 @@ class DefaultController extends ControllerBase {
       '#success_pc' => $result['success_pc'],
     ];
 
-    /** @var Renderer $renderer */
-    $renderer = \Drupal::service('renderer');
-
     return new Response(
-      $renderer->render($render_array)
+      $this->renderer->render($render_array)
     );
   }
 
