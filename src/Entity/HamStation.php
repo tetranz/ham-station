@@ -164,42 +164,11 @@ class HamStation extends ContentEntityBase implements HamStationInterface {
     $fields['last_name'] = EntityHelper::stringFieldDef('Last Name', 255, $weight++);
     $fields['suffix'] = EntityHelper::stringFieldDef('Suffix', 3, $weight++);
     $fields['organization'] = EntityHelper::stringFieldDef('Organization Name', 255, $weight++);
-
-    // Use CommerceGuys Address field for address.
-    $fields['address'] = BaseFieldDefinition::create('address')
-      ->setLabel(t('Address'))
-      ->setSetting('fields', [
-        'administrativeArea' => 'administrativeArea',
-        'locality' => 'locality',
-        'dependentLocality' => 'dependentLocality',
-        'postalCode' => 'postalCode',
-        'sortingCode' => 'sortingCode',
-        'addressLine1' => 'addressLine1',
-        'addressLine2' => 'addressLine2',
-        'organization' => '0',
-        'givenName' => '0',
-        'additionalName' => '0',
-        'familyName' => '0',
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'weight' => $weight,
-      ])
-      ->setDisplayOptions('form', [
-        'weight' => $weight,
-        'settings' => [
-          'default_country' => 'US',
-        ],
-      ]);
-
-    $weight++;
     $fields['operator_class'] = EntityHelper::stringFieldDef('Operator class', 1, $weight++);
     $fields['previous_callsign'] = EntityHelper::stringFieldDef('Previous callsign', 20, $weight++);
 
     $fields['total_hash'] = EntityHelper::stringFieldDef('Total hash', 40, $weight++);
-    $fields['address_hash'] = EntityHelper::stringFieldDef('Address hash', 40, $weight++);
+    $fields['address_hash'] = EntityHelper::stringFieldDef('Address hash', 40, $weight);
 
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
