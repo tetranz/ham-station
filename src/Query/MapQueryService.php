@@ -265,7 +265,7 @@ class MapQueryService {
     }
 
     if (empty($result)) {
-      return $result;
+      return [$result, NULL];
     }
 
     $address_alias = 'ha';
