@@ -1,18 +1,16 @@
 <?php
 
-namespace Drupal\ham_station\GridSquares;
+namespace Drupal\ham_station\Query;
+
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\ham_station\DistanceService;
-use Drupal\ham_station\Entity\HamAddress;
-use Drupal\ham_station\Entity\HamStation;
-use Drupal\ham_station\Geocodio;
 use Drupal\ham_station\GoogleGeocoder;
 
 /**
- * Service to provide subsquare calculations and factory.
+ * Service to provide data for the map.
  */
-class GridSquareService {
+class MapQueryService {
 
   /**
    * Cache or subsquares keyed by code.
@@ -21,19 +19,17 @@ class GridSquareService {
    */
   private $subsquares = [];
 
-  /**
-   * Cache of subsquare clusters keyed by central code.
-   *
-   * @var array
-   */
-  private $gridClusters = [];
-
   private $errorMessage;
 
   const QUERY_LOCATION_CALLSIGN_NOT_FOUND = 1;
   const QUERY_LOCATION_CALLSIGN_NO_ADDRESS = 2;
   const QUERY_LOCATION_CALLSIGN_NO_GEO = 3;
   const QUERY_LOCATION_CALLSIGN_SUCCESS = 4;
+
+  const DIRECTION_NORTH = 0;
+  const DIRECTION_EAST = 1;
+  const DIRECTION_SOUTH = 2;
+  const DIRECTION_WEST = 3;
 
   /**
    * @var EntityTypeManagerInterface
@@ -120,13 +116,8 @@ class GridSquareService {
   }
 
   private function getMapDataCentered($lat, $lng, $callsign = NULL) {
-    $grid_cluster = $this->getClusterFromLatLng($lat, $lng);
-    $grid_cluster->setMapCenterLat($lat);
-    $grid_cluster->setMapCenterLng($lng);
     list($locations, $query_callsign_idx) = $this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign);
-    $grid_cluster->setLocations($locations);
-    $grid_cluster->setQueryCallsignIdx($query_callsign_idx);
-    return $grid_cluster;
+    return new MapQueryResult($this->buildSubsquares($lat, $lng), $lat, $lng, $locations, $query_callsign_idx);
   }
 
   /**
@@ -221,45 +212,6 @@ class GridSquareService {
     return $this->createSubsquareFromCode($code);
   }
 
-  /**
-   * Get a cluster of neighboring subsquares.
-   *
-   * @param Subsquare $subsquare
-   *   Central subsquare.
-   *
-   * @return GridSquareCluster
-   *   Cluster of 9 subsquares.
-   */
-  public function getCluster(Subsquare $subsquare) {
-    $code_uc = strtoupper($subsquare->getCode());
-    
-    if (isset($this->gridClusters[$code_uc])) {
-      return $this->gridClusters[$code_uc];
-    }
-
-    $delta = 0.01;
-    
-    $cluster = new GridSquareCluster(
-      $subsquare,
-      $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngWest() - $delta),
-      $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngCenter()),
-      $this->createSubsquareFromLatLng($subsquare->getLatNorth() + $delta, $subsquare->getLngEast() + $delta),
-      $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngEast() + $delta),
-      $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngEast() + $delta),
-      $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngCenter()),
-      $this->createSubsquareFromLatLng($subsquare->getLatSouth() - $delta, $subsquare->getLngWest() - $delta),
-      $this->createSubsquareFromLatLng($subsquare->getLatCenter(), $subsquare->getLngWest() - $delta)
-    );
-    
-    $this->gridClusters[$code_uc] = $cluster;
-    return $cluster;
-  }
-
-  private function getClusterFromLatLng($lat, $lng) {
-    $center_subsquare = $this->createSubsquareFromLatLng($lat, $lng);
-    return $this->getCluster($center_subsquare);
-  }
-
   private function callsignQuery($callsign) {
     $query = $this->dbConnection->select('ham_station', 'hs');
     $query->addJoin('INNER', 'ham_address', 'ha', 'ha.hash = hs.address_hash');
@@ -342,7 +294,7 @@ class GridSquareService {
         );
         $location->addAddress($address);
         $address_map[$row->id] = count($location->getAddresses()) - 1;
-      }
+      }    
       else {
         $address = $location->getAddresses()[$address_map[$row->id]];
       }
@@ -383,6 +335,123 @@ class GridSquareService {
 
   public function getErrorMessage() {
     return $this->errorMessage;
+  }
+
+  private function buildSubsquares($lat, $lng) {
+    $code = $this->latLngToSubsquareCode($lat, $lng);
+    $subsquares = [0 => [0 => $this->createSubsquareFromCode($code)]];
+
+    for ($i = 0; $i < 5; $i++) {
+      $subsquares = $this->enlargeCluster($subsquares);
+    }
+
+    return $subsquares;
+  }
+
+  private function enlargeCluster(array $cluster) {
+    $north_side = $this->buildNorthSide($cluster);
+    $east_side = $this->buildEastSide($cluster);
+    $south_side = $this->buildSouthSide($cluster);
+    $west_side = $this->buildWestSide($cluster);
+    $corners = $this->buildCorners($cluster);
+
+    for ($x = 0; $x < count($cluster); $x++) {
+      array_unshift($cluster[$x], $south_side[$x]);
+      array_push($cluster[$x], $north_side[$x]);
+    }
+
+    array_unshift($west_side, $corners[2]);
+    array_push($west_side, $corners[3]);
+    array_unshift($cluster, $west_side);
+
+    array_unshift($east_side, $corners[1]);
+    array_push($east_side, $corners[0]);
+    array_push($cluster, $east_side);
+
+    return $cluster;
+  }
+
+  private function buildNorthSide($cluster) {
+    $y = count($cluster[0]) - 1;
+    $edge = [];
+    for ($x = 0; $x < count($cluster); $x++) {
+      $edge[] = $this->buildNextSubsquare($cluster[$x][$y], self::DIRECTION_NORTH);
+    }
+    return $edge;
+  }
+
+  private function buildEastSide($cluster) {
+    $x = count($cluster) - 1;
+    $edge = [];
+    for ($y = 0; $y < count($cluster[0]); $y++) {
+      $edge[] = $this->buildNextSubsquare($cluster[$x][$y], self::DIRECTION_EAST);
+    }
+    return $edge;
+  }
+
+  private function buildSouthSide($cluster) {
+    $y = 0;
+    $edge = [];
+    for ($x = 0; $x < count($cluster); $x++) {
+      $edge[] = $this->buildNextSubsquare($cluster[$x][$y], self::DIRECTION_SOUTH);
+    }
+    return $edge;
+  }
+
+  private function buildWestSide($cluster) {
+    $edge = [];
+    for ($y = 0; $y < count($cluster[0]); $y++) {
+      $edge[] = $this->buildNextSubsquare($cluster[0][$y], self::DIRECTION_WEST);
+    }
+    return $edge;
+  }
+
+  private function buildCorners(array $cluster) {
+    $delta = 0.01;
+    $max_idx = count($cluster) - 1;
+    $corners = [];
+
+    $ne = $cluster[$max_idx][$max_idx];
+    $corners[] = $this->createSubsquareFromLatLng($ne->getLatNorth() + $delta, $ne->getLngEast() + $delta);
+
+    $se = $cluster[$max_idx][0];
+    $corners[] = $this->createSubsquareFromLatLng($se->getLatSouth() - $delta, $se->getLngEast() + $delta);
+
+    $sw = $cluster[0][0];
+    $corners[] = $this->createSubsquareFromLatLng($sw->getLatSouth() - $delta, $sw->getLngWest() - $delta);
+
+    $nw = $cluster[0][$max_idx];
+    $corners[] = $this->createSubsquareFromLatLng($nw->getLatNorth() + $delta, $nw->getLngWest() - $delta);
+
+    return $corners;
+  }
+
+  /**
+   * @param Subsquare $subsquare
+   * @param $direction
+   * @return SubSquare
+   */
+  private function buildNextSubsquare(Subsquare $subsquare, $direction) {
+    $lat = $subsquare->getLatCenter();
+    $lng = $subsquare->getLngCenter();
+    $delta = 0.01;
+
+    switch ($direction) {
+      case self::DIRECTION_NORTH:
+        $lat = $subsquare->getLatNorth() + $delta;
+        break;
+      case self::DIRECTION_EAST:
+        $lng = $subsquare->getLngEast() + $delta;
+        break;
+      case self::DIRECTION_SOUTH:
+        $lat = $subsquare->getLatSouth() - $delta;
+        break;
+      case self::DIRECTION_WEST:
+        $lng = $subsquare->getLngWest() - $delta;
+        break;
+    }
+
+    return $this->createSubsquareFromLatLng($lat,$lng);
   }
 
 }

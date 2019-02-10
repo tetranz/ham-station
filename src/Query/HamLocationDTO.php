@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\ham_station\GridSquares;
+namespace Drupal\ham_station\Query;
 
 class HamLocationDTO {
 

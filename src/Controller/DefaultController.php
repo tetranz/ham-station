@@ -5,7 +5,7 @@ namespace Drupal\ham_station\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Renderer;
 use Drupal\ham_station\Form\HamMapForm;
-use Drupal\ham_station\GridSquares\GridSquareService;
+use Drupal\ham_station\Query\MapQueryService;
 use Drupal\ham_station\ReportService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,9 +19,9 @@ use Symfony\Component\Serializer\Serializer;
 class DefaultController extends ControllerBase {
 
   /**
-   * @var GridSquareService
+   * @var MapQueryService
    */
-  private $gridSquareService;
+  private $mapQueryService;
 
   /**
    * @var ReportService
@@ -39,12 +39,12 @@ class DefaultController extends ControllerBase {
   private $renderer;
 
   public function __construct(
-    GridSquareService $grid_square_service,
+    MapQueryService $map_query_service,
     ReportService $report_service,
     Serializer $serializer,
     Renderer $renderer
   ) {
-    $this->gridSquareService = $grid_square_service;
+    $this->mapQueryService = $map_query_service;
     $this->reportService = $report_service;
     $this->serializer = $serializer;
     $this->renderer = $renderer;
@@ -55,7 +55,7 @@ class DefaultController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('ham_station.gridsquare_service'),
+      $container->get('ham_station.map_query_service'),
       $container->get('ham_station.report_service'),
       $container->get('serializer'),
       $container->get('renderer')
@@ -104,10 +104,11 @@ class DefaultController extends ControllerBase {
     $query_type = $request->get('queryType');
     $query_value = $request->get('value');
 
-    $result = $this->gridSquareService->mapQuery($query_type, $query_value);
+    $result = $this->mapQueryService->mapQuery($query_type, $query_value);
+
     if (empty($result)) {
       return new JsonResponse([
-        'error' => $this->gridSquareService->getErrorMessage(),
+        'error' => $this->mapQueryService->getErrorMessage(),
       ]);
     }
 

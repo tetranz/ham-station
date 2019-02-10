@@ -13,8 +13,6 @@ const hamstationApp = (function ($) {
     let txtOverlay;
     let mapCenterChangedListener = null;
 
-    let gridKeys = ['center', 'northWest', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west'];
-
     function selectQueryType(queryType) {
       let labels = {
         c:['Callsign', 'Enter a callsign.'],
@@ -83,7 +81,7 @@ const hamstationApp = (function ($) {
       clearRectangles();
 
       if (show) {
-        gridKeys.forEach(el => drawGridsquare(mapData[el]));
+        mapData.subsquares.forEach(x => x.forEach(y => drawGridsquare(y)));
       }
     }
 
@@ -109,7 +107,7 @@ const hamstationApp = (function ($) {
       clearGridLabels();
 
       if (show) {
-        gridKeys.forEach(el => writeGridLabel(mapData[el]));
+        mapData.subsquares.forEach(x => x.forEach(y => writeGridLabel(y)));
       }
     }
 
@@ -475,6 +473,7 @@ const hamstationApp = (function ($) {
         uiCtrl.init(txtlib.txtOverlay);
         setupEventListeners();
         setupAutocomplete();
+        document.getElementById('edit-query').focus();
         initialQuery(hs_settings)
       }
     };

@@ -39,11 +39,8 @@ services:
     class: Drupal\ham_station\ReportService
     arguments: ['@database', '@cache.default']
 
-  ham_station.grid_calculator:
-    class: Drupal\ham_station\GridSquares\Calculator
-
-  ham_station.gridsquare_service:
-    class: Drupal\ham_station\GridSquares\GridSquareService
+  ham_station.map_query_service:
+    class: Drupal\ham_station\Query\MapQueryService
     arguments:
       - '@entity_type.manager'
       - '@database'
