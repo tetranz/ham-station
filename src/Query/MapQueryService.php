@@ -21,15 +21,15 @@ class MapQueryService {
 
   private $errorMessage;
 
-  const QUERY_LOCATION_CALLSIGN_NOT_FOUND = 1;
-  const QUERY_LOCATION_CALLSIGN_NO_ADDRESS = 2;
-  const QUERY_LOCATION_CALLSIGN_NO_GEO = 3;
-  const QUERY_LOCATION_CALLSIGN_SUCCESS = 4;
-
   const DIRECTION_NORTH = 0;
   const DIRECTION_EAST = 1;
   const DIRECTION_SOUTH = 2;
   const DIRECTION_WEST = 3;
+
+  const GEOCODE_STATUS_PENDING = 0;
+  const GEOCODE_STATUS_SUCCESS = 1;
+  const GEOCODE_STATUS_NOT_FOUND = 2;
+  const GEOCODE_STATUS_PO_BOX = 3;
 
   /**
    * @var EntityTypeManagerInterface
@@ -91,7 +91,7 @@ class MapQueryService {
     $callsign = strtoupper($callsign);
     $result = $this->callsignQuery($callsign);
 
-    if ($result['status'] !== static::QUERY_LOCATION_CALLSIGN_SUCCESS) {
+    if (isset($result['error'])) {
       $this->errorMessage = $result['error'];
       return NULL;
     }
@@ -215,23 +215,30 @@ class MapQueryService {
   private function callsignQuery($callsign) {
     $query = $this->dbConnection->select('ham_station', 'hs');
     $query->addJoin('INNER', 'ham_address', 'ha', 'ha.hash = hs.address_hash');
-    $query->addJoin('INNER', 'ham_location', 'hl', 'hl.id = ha.location_id');
+    $query->addJoin('LEFT', 'ham_location', 'hl', 'hl.id = ha.location_id');
+    $query->fields('ha', ['geocode_status']);
     $query->fields('hl', ['latitude', 'longitude']);
     $query->condition('hs.callsign', $callsign);
 
     $result = $query->execute()->fetch();
 
-    $return = ['callsign' => $callsign];
-
     if ($result === FALSE) {
-      return $return + [
-        'status' => static::QUERY_LOCATION_CALLSIGN_NO_ADDRESS,
-        'error' => sprintf('We were unable to geocode the location of callsign %s.', $callsign),
-      ];
+      return ['error' => sprintf('We have no record of callsign %s.', $callsign)];
     }
 
-    return $return + [
-      'status' => static::QUERY_LOCATION_CALLSIGN_SUCCESS,
+    if ($result->geocode_status == self::GEOCODE_STATUS_PENDING) {
+      return ['error' => sprintf('The address for %s has not been geocoded yet.', $callsign)];
+    }
+
+    if ($result->geocode_status == self::GEOCODE_STATUS_NOT_FOUND) {
+      return ['error' => sprintf('The address for %s could not be geocoded.', $callsign)];
+    }
+
+    if ($result->geocode_status == self::GEOCODE_STATUS_PO_BOX) {
+      return ['error' => sprintf('The address for %s is a PO Box.', $callsign)];
+    }
+
+    return [
       'lat' => (float) $result->latitude,
       'lng' => (float) $result->longitude
     ];
