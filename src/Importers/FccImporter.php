@@ -132,7 +132,9 @@ class FccImporter {
     INNER JOIN {fcc_license_hd} hd ON hd.unique_system_identifier = en.unique_system_identifier AND hd.license_status = \'A\'
     WHERE NOT EXISTS (SELECT id FROM {ham_address} ha WHERE ha.hash = en.address_hash)
     AND en.unique_system_identifier = (
-    SELECT MIN(en2.unique_system_identifier) FROM {fcc_license_en} en2 WHERE en2.address_hash = en.address_hash)';
+    SELECT MIN(en2.unique_system_identifier) 
+    FROM {fcc_license_en} en2 INNER JOIN {fcc_license_hd} hd2 ON hd2.unique_system_identifier = en2.unique_system_identifier
+    WHERE hd2.license_status = \'A\' AND en2.address_hash = en.address_hash)';
 
     $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
 
