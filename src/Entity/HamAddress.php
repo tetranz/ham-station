@@ -188,23 +188,6 @@ class HamAddress extends ContentEntityBase implements HamAddressInterface {
         ],
       ]);
 
-    $fields['address_type'] = BaseFieldDefinition::create('list_integer')
-      ->setLabel(t('Address type'))
-      ->setSetting('allowed_values', [
-        0 => 'Undetermined',
-        1 => 'Physical',
-        2 => 'Non-physical (PO Box etc)',
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'weight' => $weight,
-      ])
-      ->setDisplayOptions('form', [
-        'weight' => $weight,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
-
     $weight++;
 
     $fields['geocode_provider'] = EntityHelper::stringFieldDef('Geocode provider', 2, $weight++);

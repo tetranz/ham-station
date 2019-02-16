@@ -121,12 +121,11 @@ class FccImporter {
     INSERT INTO {ham_address}
     (uuid, langcode, hash,
     address__address_line1, address__locality, address__administrative_area,
-    address__postal_code, address__country_code, address_type, geocode_status,
+    address__postal_code, address__country_code, geocode_status,
     user_id, status, created, changed)
     SELECT UUID() AS uuid, \'en\' AS langcode, address_hash as hash,
     en.street_address AS address__address_line1, en.city AS address__locality, en.state AS address__administrative_area,
-    en.zip_code AS address__postal_code, \'US\' AS address__country_code,
-    0 AS address_type, 0 AS geocode_status,
+    en.zip_code AS address__postal_code, \'US\' AS address__country_code, 0 AS geocode_status,
     1 AS user_id, 1 AS status, unix_timestamp() AS created, unix_timestamp() AS changed
     FROM {fcc_license_en} en
     INNER JOIN {fcc_license_hd} hd ON hd.unique_system_identifier = en.unique_system_identifier AND hd.license_status = \'A\'
