@@ -229,6 +229,20 @@ class HamAddress extends ContentEntityBase implements HamAddressInterface {
 
     $weight++;
 
+    $fields['geocode_time'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Geocode time'))
+      ->setDescription(t('Timestamp of last geocode attempt.'))
+      ->setDisplayOptions('view', [
+        'weight' => $weight,
+      ])
+      ->setDisplayOptions('form', [
+        'weight' => $weight,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $weight++;
+
     $fields['location_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
       ->setDescription(t('The related HamLocation entity.'))
