@@ -4,6 +4,7 @@ namespace Drupal\ham_station\Importers;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Database;
+use Drupal\ham_station\Query\MapQueryService;
 use Psr\Log\LoggerInterface;
 
 class FccImporter {
@@ -207,6 +208,31 @@ class FccImporter {
     $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
 
     $msg = sprintf('%s inactive FCC locations deleted.', $row_count);
+    $this->logger->info($msg);
+
+    if ($callback !== NULL) {
+      $callback($msg);
+    }
+  }
+
+  /**
+   * Set some addresses as likely being a PO Box.
+   *
+   * @param callable $callback
+   */
+  public function setPoBox(callable $callback) {
+    $sql = '
+    UPDATE ham_address
+    SET geocode_status = :pobox_status
+    WHERE address__address_line1 LIKE :pobox_like';
+
+    $row_count = $this->dbConnection->query(
+      $sql,
+      [':pobox_status' => MapQueryService::GEOCODE_STATUS_PO_BOX, ':pobox_like' => 'PO Box%'],
+      ['return' => Database::RETURN_AFFECTED]
+    );
+
+    $msg = sprintf('%s addresses set as PO Box.', $row_count);
     $this->logger->info($msg);
 
     if ($callback !== NULL) {

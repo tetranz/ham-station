@@ -118,6 +118,18 @@ class HamStationCommands extends DrushCommands {
   }
 
   /**
+   * Set addresses as PO Box.
+   *
+   * @usage ham_station:set-po-box
+   *   Usage Set addresses as PO Box.
+   *
+   * @command ham_station:set-po-box
+   */
+  public function setPoBoxAddresses() {
+    $this->fccImporter->setPoBox([$this->io(), 'writeln']);
+  }
+
+  /**
    * Geocode some addresses.
    *
    * @usage ham_station:geocode
