@@ -131,6 +131,8 @@ const hamstationApp = (function ($) {
           drawMarker(location);
         }
       });
+
+      openQueriedCallsign();
     }
 
     // Remove the marker for the callsign that was queried.
@@ -149,6 +151,18 @@ const hamstationApp = (function ($) {
       let marker = markers.get(location.id);
       marker.setMap(null);
       markers.delete(location.id);
+    }
+
+    // Open infowindow for queries callsign.
+    function openQueriedCallsign() {
+      if (mapData.queryCallsignIdx === null) {
+        return;
+      }
+
+      let location = mapData.locations[mapData.queryCallsignIdx];
+      let marker = markers.get(location.id);
+
+      openInfowindow(location, marker);
     }
 
     function markerLabel(location) {
@@ -174,41 +188,44 @@ const hamstationApp = (function ($) {
       markers.set(location.id, marker);
 
       marker.addListener('click', e => {
-        clearInfoWindow();
+        openInfowindow(location, marker);
+      });
+    }
 
-        let addresses = [];
-        let lastIndex = location.addresses.length - 1;
-        let multi = location.addresses.length > 1;
-        location.addresses.forEach((address, index) => {
-          let classes = ['address'];
-          if (multi) {
-            if (index === 0) {
-              classes.push('first');
-            }
-            else if(index === lastIndex)
-            {
-              classes.push('last');
-            }
-          }
-          addresses.push(`<div class="${classes.join(' ')}">${writeAddress(address)}</div>`);
-        });
+    function openInfowindow(location, marker) {
+      clearInfoWindow();
 
-        let classes = ['infowindow'];
+      let addresses = [];
+      let lastIndex = location.addresses.length - 1;
+      let multi = location.addresses.length > 1;
+      location.addresses.forEach((address, index) => {
+        let classes = ['address'];
         if (multi) {
-          classes.push('multi');
+          if (index === 0) {
+            classes.push('first');
+          }
+          else if(index === lastIndex)
+          {
+            classes.push('last');
+          }
         }
-        let infowindow = new google.maps.InfoWindow({
-          content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
-          zIndex: 99
-        });
+        addresses.push(`<div class="${classes.join(' ')}">${writeAddress(address)}</div>`);
+      });
 
-        infowindow.open(map, marker);
-        activeInfoWindow = infowindow;
+      let classes = ['infowindow'];
+      if (multi) {
+        classes.push('multi');
+      }
+      let infowindow = new google.maps.InfoWindow({
+        content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
+        zIndex: 99
+      });
 
-        infowindow.addListener('closeclick', () => {
-          activeInfoWindow = null;
-        });
+      infowindow.open(map, marker);
+      activeInfoWindow = infowindow;
 
+      infowindow.addListener('closeclick', () => {
+        activeInfoWindow = null;
       });
     }
 
