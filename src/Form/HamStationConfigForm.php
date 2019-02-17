@@ -54,11 +54,11 @@ class HamStationConfigForm extends ConfigFormBase {
       '#default_value' => $config->get($key),
     ];
 
-    $key = 'geocode_cron_enable';
+    $key = 'geocoding_enable';
     $form[$key] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable geocoding on cron'),
-      '#description' => $this->t('Geocode a batch of addresses on cron.'),
+      '#title' => $this->t('Enable geocoding'),
+      '#description' => $this->t('Geocode a batch of addresses at regular intervals.'),
       '#default_value' => $config->get($key),
     ];
 
@@ -92,7 +92,7 @@ class HamStationConfigForm extends ConfigFormBase {
       'geocodio_api_key',
       'google_geocode_api_key',
       'geocode_batch_size',
-      'geocode_cron_enable',
+      'geocoding_enable',
       'extra_batch_query_where',
     ];
 

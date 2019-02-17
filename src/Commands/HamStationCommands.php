@@ -2,9 +2,7 @@
 
 namespace Drupal\ham_station\Commands;
 
-use Drupal\ham_station\Geocoder;
 use Drupal\ham_station\Importers\FccImporter;
-use Drupal\ham_station\OSMGeocoder;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -19,24 +17,8 @@ class HamStationCommands extends DrushCommands {
    */
   private $fccImporter;
 
-  /**
-   * The geocoder service.
-   *
-   * @var Geocoder
-   */
-  private $geocoder;
-
-  /**
-   * OSM geocoding service.
-   *
-   * @var OSMGeocoder
-   */
-  private $osmGeocoder;
-
-  public function __construct(FccImporter $fcc_importer, Geocoder $geocoder, OSMGeocoder $osm_geocoder) {
+  public function __construct(FccImporter $fcc_importer) {
     $this->fccImporter = $fcc_importer;
-    $this->geocoder = $geocoder;
-    $this->osmGeocoder = $osm_geocoder;
   }
 
   /**
@@ -127,60 +109,6 @@ class HamStationCommands extends DrushCommands {
    */
   public function setPoBoxAddresses() {
     $this->fccImporter->setPoBox([$this->io(), 'writeln']);
-  }
-
-  /**
-   * Geocode some addresses.
-   *
-   * @usage ham_station:geocode
-   *   Geocode some addresses.
-   *
-   * @command ham_station:geocode
-   * @aliases hsigeo
-   */
-  public function geocode() {
-    $this->geocoder->geoCode([$this->io(), 'writeln']);
-  }
-
-  /**
-   * Copy geocode results for duplicate addresses
-   *
-   * @usage ham_station:copygeo
-   *   Copy geocode results for duplicate addresses.
-   *
-   * @command ham_station:copygeo
-   * @aliases hsicpgeo
-   */
-  public function copyGeocodeForDuplicates() {
-    $this->geocoder->copyGeocodeForDuplicates([$this->io(), 'writeln']);
-  }
-
-  /**
-   * reload lat and lng from stored json.
-   *
-   * @usage ham_station:reloadlatlng
-   *   reload lat and lng from stored json.
-   *
-   * @command ham_station:reloadlatlng
-   */
-  public function reloadLatlng() {
-    $this->geocoder->reloadLatLng([$this->io(), 'writeln']);
-  }
-
-  /**
-   * Geocode from OSM data.
-   *
-   * @param $id_suffix
-   *   Last two digits of entity id.
-   *
-   * @usage ham_station:osmgeocode
-   *   Geocode some addresses.
-   *
-   * @command ham_station:osmgeocode
-   * @aliases hsiosmgeo
-   */
-  public function osmgeocode($id_suffix) {
-    $this->osmGeocoder->geoCode($id_suffix, [$this->io(), 'writeln']);
   }
 
 }
