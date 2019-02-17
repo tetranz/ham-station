@@ -54,11 +54,19 @@ class HamStationConfigForm extends ConfigFormBase {
       '#default_value' => $config->get($key),
     ];
 
-    $key = 'geocoding_enable';
+    $key = 'batch_geocoding_enable';
     $form[$key] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable geocoding'),
+      '#title' => $this->t('Enable batch geocoding'),
       '#description' => $this->t('Geocode a batch of addresses at regular intervals.'),
+      '#default_value' => $config->get($key),
+    ];
+
+    $key = 'batch_geocoding_retry_not_found';
+    $form[$key] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Retry not found geocodes'),
+      '#description' => $this->t('Retry previously failed geocodes.'),
       '#default_value' => $config->get($key),
     ];
 
@@ -68,14 +76,6 @@ class HamStationConfigForm extends ConfigFormBase {
       '#title' => $this->t('Number of geocoding attempted on each cron.'),
       '#min' => 0,
       '#step' => 1,
-      '#default_value' => $config->get($key),
-    ];
-
-    $key = 'extra_batch_query_where';
-    $form[$key] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Extra batch query where'),
-      '#description' => $this->t('Arbitary WHERE condition to add to the batch query. Intended for debugging.'),
       '#default_value' => $config->get($key),
     ];
 
@@ -92,8 +92,8 @@ class HamStationConfigForm extends ConfigFormBase {
       'geocodio_api_key',
       'google_geocode_api_key',
       'geocode_batch_size',
-      'geocoding_enable',
-      'extra_batch_query_where',
+      'batch_geocoding_enable',
+      'batch_geocoding_retry_not_found',
     ];
 
     foreach ($keys as $key) {
