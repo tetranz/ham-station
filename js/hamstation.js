@@ -124,18 +124,19 @@ const hamstationApp = (function ($) {
         }
       }
 
+      removeQueriedCallsign();
+
       mapData.locations.forEach(location => {
         if (!markers.has(location.id)) {
           drawMarker(location);
         }
       });
-
-      setQueryCallsignMarkerLabel();
     }
 
-    // Set the label of the callsign we queried. We want the queried callsign to
-    // show even if it is not being redrawn.
-    function setQueryCallsignMarkerLabel() {
+    // Remove the marker for the callsign that was queried.
+    // This forces a redraw to put the queried call on the label
+    // and at the top of the infowindow.
+    function removeQueriedCallsign() {
       if (mapData.queryCallsignIdx === null) {
         return;
       }
@@ -145,7 +146,9 @@ const hamstationApp = (function ($) {
         return;
       }
 
-      markers.get(location.id).setLabel(markerLabel(location));
+      let marker = markers.get(location.id);
+      marker.setMap(null);
+      markers.delete(location.id);
     }
 
     function markerLabel(location) {
