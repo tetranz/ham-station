@@ -148,6 +148,10 @@ const hamstationApp = (function ($) {
         return;
       }
 
+      if (getStationCountForLocation(location) < 2) {
+        return;
+      }
+
       let marker = markers.get(location.id);
       marker.setMap(null);
       markers.delete(location.id);
@@ -160,16 +164,23 @@ const hamstationApp = (function ($) {
       }
 
       let location = mapData.locations[mapData.queryCallsignIdx];
+      console.log(location);
       let marker = markers.get(location.id);
 
       openInfowindow(location, marker);
     }
 
-    function markerLabel(location) {
+    function getStationCountForLocation(location) {
       let stationCount = 0;
       location.addresses.forEach(address => {
         address.stations.forEach(station => stationCount++);
       });
+
+      return stationCount;
+    }
+
+    function markerLabel(location) {
+      let stationCount = getStationCountForLocation(location);
       return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
     }
 
