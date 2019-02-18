@@ -29,7 +29,7 @@ class HamMapForm extends FormBase {
 
     $row1['col_left'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['col-md-3']],
+      '#attributes' => ['class' => ['col-md-2']],
     ];
 
     $col_left = &$row1['col_left'];
