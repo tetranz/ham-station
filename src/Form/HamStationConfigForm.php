@@ -73,7 +73,16 @@ class HamStationConfigForm extends ConfigFormBase {
     $key = 'geocode_batch_size';
     $form[$key] = [
       '#type' => 'number',
-      '#title' => $this->t('Number of geocoding attempted on each cron.'),
+      '#title' => $this->t('Number of geocoding attempted in each batch.'),
+      '#min' => 0,
+      '#step' => 1,
+      '#default_value' => $config->get($key),
+    ];
+
+    $key = 'geocode_retry_size';
+    $form[$key] = [
+      '#type' => 'number',
+      '#title' => $this->t('Number of geocoding retries attempted in each batch.'),
       '#min' => 0,
       '#step' => 1,
       '#default_value' => $config->get($key),
@@ -94,6 +103,7 @@ class HamStationConfigForm extends ConfigFormBase {
       'geocode_batch_size',
       'batch_geocoding_enable',
       'batch_geocoding_retry_not_found',
+      'geocode_retry_size',
     ];
 
     foreach ($keys as $key) {
