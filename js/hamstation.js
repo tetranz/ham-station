@@ -420,9 +420,13 @@ const hamstationApp = (function ($) {
         }
 
         let path = '/map';
-        if ('cgz'.indexOf(query.queryType) > -1) {
+        if (query.queryType === 'c') {
+          path += `/${query.value}`;
+        }
+        else if ('gz'.indexOf(query.queryType) > -1) {
           path += `/${query.queryType}/${query.value}`;
         }
+
         window.history.pushState({}, null, path);
 
         setCenterEnabled = false;

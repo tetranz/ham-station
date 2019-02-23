@@ -38,7 +38,7 @@ class HamMapForm extends FormBase {
       '#type' => 'radios',
       '#options' => [
         'c' => 'Callsign',
-        'g' => 'Grid square',
+        'g' => 'Gridsquare',
         'z' => 'Zip code',
         'a' => 'Street address',
       ],

@@ -74,6 +74,12 @@ class DefaultController extends ControllerBase {
    */
   public function hamMap($query_type, $query_value) {
 
+    if (!empty($query_type) && empty($query_value)) {
+      // Allow url like /KT1F.
+      $query_value = $query_type;
+      $query_type = 'c';
+    }
+
     $block_content_storage = $this->entityTypeManager()->getStorage('block_content');
 
     $block_ids = $block_content_storage->getQuery()
