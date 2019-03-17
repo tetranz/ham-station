@@ -62,27 +62,21 @@ class HamStationConfigForm extends ConfigFormBase {
       '#default_value' => $config->get($key),
     ];
 
-    $key = 'batch_geocoding_retry_not_found';
-    $form[$key] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Retry not found geocodes'),
-      '#description' => $this->t('Retry previously failed geocodes.'),
-      '#default_value' => $config->get($key),
-    ];
-
-    $key = 'geocode_batch_size';
+    $key = 'max_geocode_batch_size';
     $form[$key] = [
       '#type' => 'number',
-      '#title' => $this->t('Number of geocoding attempted in each batch.'),
+      '#title' => $this->t('Maximum geocode batch size.'),
+      '#description' => $this->t('Maximum number of geocodes attempted in each batch.'),
       '#min' => 0,
       '#step' => 1,
       '#default_value' => $config->get($key),
     ];
 
-    $key = 'geocode_retry_size';
+    $key = 'min_geocode_batch_size';
     $form[$key] = [
       '#type' => 'number',
-      '#title' => $this->t('Number of geocoding retries attempted in each batch.'),
+      '#title' => $this->t('Maximum geocode batch size.'),
+      '#description' => $this->t('Minimim number of geocodes attempted in each batch. If there are not enough new addresses, enough old addresses will be retried.'),
       '#min' => 0,
       '#step' => 1,
       '#default_value' => $config->get($key),
@@ -100,10 +94,9 @@ class HamStationConfigForm extends ConfigFormBase {
       'google_maps_api_key',
       'geocodio_api_key',
       'google_geocode_api_key',
-      'geocode_batch_size',
       'batch_geocoding_enable',
-      'batch_geocoding_retry_not_found',
-      'geocode_retry_size',
+      'max_geocode_batch_size',
+      'min_geocode_batch_size',
     ];
 
     foreach ($keys as $key) {
