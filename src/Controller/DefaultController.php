@@ -2,6 +2,7 @@
 
 namespace Drupal\ham_station\Controller;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Renderer;
 use Drupal\ham_station\Form\HamMapForm;
@@ -127,26 +128,13 @@ class DefaultController extends ControllerBase {
   }
 
   /**
-   * Get the geocode status report.
+   * Invalidate cache tag for geocode report.
    *
-   * Use ajax for this so can use the anonymous page cache.
-   *
-   * @return \Symfony\Component\HttpFoundation\Response
-   *   The response.
+   * @return Response
    */
-  public function geocodeReportAjax() {
-    $result = $this->reportService->geocodeStatus();
-
-    $render_array = [
-      '#theme' => 'ham_neighbors_report',
-      '#state_counts' => $result['states'],
-      '#totals'  => $result['totals'],
-      '#success_pc' => $result['success_pc'],
-    ];
-
-    return new Response(
-      $this->renderer->render($render_array)
-    );
+  public function invalidateGeocodeCache() {
+    Cache::invalidateTags(['geocoding']);
+    return new Response('', 204);
   }
 
 }

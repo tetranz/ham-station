@@ -3,9 +3,12 @@
 namespace Drupal\ham_station\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\ham_station\Form\HamNeighborsForm;
 use Drupal\ham_station\ReportService;
+use Drupal\node\Entity\Node;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -61,17 +64,14 @@ class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function build() {
-    // Report content is requested via ajax so we can use the anonymous page cache.
+    $result = $this->reportService->geocodeStatus();
+
     return [
-      '#markup' => '<div class="ham-map-report"></div>',
-      '#attached' => [
-        'library' => ['ham_station/map_report'],
-        'drupalSettings' => [
-          'ham_neighbors' => [
-            'status' => 0,
-          ],
-        ],
-      ],
+      '#theme' => 'ham_neighbors_report',
+      '#state_counts' => $result['states'],
+      '#totals'  => $result['totals'],
+      '#success_pc' => $result['success_pc'],
+      '#cache' => ['tags' => ['geocoding'], 'max-age' => Cache::PERMANENT],
     ];
   }
 

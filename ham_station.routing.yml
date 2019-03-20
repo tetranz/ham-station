@@ -24,9 +24,11 @@ ham_station.ham_map_ajax:
     _method: 'POST'
     _permission: 'access content'
 
-ham_station.geocode_report_ajax:
-  path: '/ham-map/geocode-report-ajax'
+ham_station.geocode_invalidate_cache:
+  path: '/ham-map/invalidate-geocode-cache/{key}'
   defaults:
-    _controller: '\Drupal\ham_station\Controller\DefaultController::geocodeReportAjax'
+    _controller: '\Drupal\ham_station\Controller\DefaultController::invalidateGeocodeCache'
+  options:
+    no_cache: TRUE
   requirements:
-    _permission: 'access content'
+    _access_system_cron: 'TRUE'

@@ -6,7 +6,3 @@ neighbors:
   dependencies:
     - core/jquery
     - core/jquery.once
-
-map_report:
-  js:
-    js/map-report.js: {}

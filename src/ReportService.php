@@ -44,14 +44,6 @@ class ReportService {
    *
    */
   public function geocodeStatus() {
-
-    $cache_key = 'ham_station_geocode_counts';
-    $result = $this->cache->get($cache_key);
-
-    if ($result !== FALSE) {
-      return $result->data;
-    }
-
     // Generate a geocode status report by state.
     $query = $this->dbConnection->select('ham_address', 'ha');
     $query->addField('ha', 'address__administrative_area', 'state');
@@ -80,9 +72,6 @@ class ReportService {
       'states' => $states,
       'totals' => $totals,
     ];
-
-    // Cache is invalidated when geocoding happens.
-    $this->cache->set($cache_key, $result);
 
     return $result;
   }
