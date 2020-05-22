@@ -304,6 +304,18 @@ class HamAddress extends ContentEntityBase implements HamAddressInterface {
     $fields['osm_latitude'] = EntityHelper::decimalFieldDef('OSM latitude', 10, 7, $weight++);
     $fields['osm_longitude'] = EntityHelper::decimalFieldDef('OSM longitude', 10, 7, $weight++);
 
+    $fields['geocode_priority'] = BaseFieldDefinition::create('integer')
+    ->setLabel(t('Geocode priority'))
+    ->setDisplayOptions('view', [
+      'label' => 'above',
+      'weight' => $weight,
+    ])
+    ->setDisplayOptions('form', [
+      'weight' => $weight,
+    ])
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
       ->setDescription(t('The user ID of author of the Ham address entity.'))

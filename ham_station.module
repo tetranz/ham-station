@@ -82,3 +82,16 @@ function ham_station_library_info_alter(&$libraries, $extension) {
 function ham_station_location_label_callback(HamLocation $location) {
   return sprintf('%s,%s', $location->get('latitude')->value, $location->get('longitude')->value);
 }
+
+/**
+ * Install new entity field from definition in entity.
+ *
+ * @param string $entity_type_id
+ * Entity type id.
+ * @param string $field_name
+ * Field name.
+ */
+function ham_info_install_entity_field($entity_type_id, $field_name) {
+  $storage_definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions($entity_type_id)[$field_name];
+  \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionCreate($storage_definition);
+}

@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Install geocode_priority field.
+ */
+function ham_station_update_8001() {
+    ham_info_install_entity_field('ham_address', 'geocode_priority');
+}
