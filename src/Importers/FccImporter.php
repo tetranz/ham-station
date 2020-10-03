@@ -221,10 +221,12 @@ class FccImporter {
    * @param callable $callback
    */
   public function setPoBox(callable $callback) {
+    // Don't override manual settings.
     $sql = '
     UPDATE ham_address
     SET geocode_status = :pobox_status
-    WHERE address__address_line1 LIKE :pobox_like';
+    WHERE address__address_line1 LIKE :pobox_like
+    AND (geocode_provider IS NULL OR geocode_provider != \'mn\')';
 
     $row_count = $this->dbConnection->query(
       $sql,
