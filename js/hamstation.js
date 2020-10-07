@@ -185,6 +185,12 @@ const hamstationApp = (function ($) {
     }
 
     function drawMarker(location) {
+
+      if (location.addresses.length === 0) {
+        // @todo Find out why we have locations with no addresses.
+        return;
+      }
+
       let stationCount = 0;
       location.addresses.forEach(address => {
         address.stations.forEach(station => stationCount++);
