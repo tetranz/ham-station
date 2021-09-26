@@ -95,3 +95,26 @@ function ham_info_install_entity_field($entity_type_id, $field_name) {
   $storage_definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions($entity_type_id)[$field_name];
   \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionCreate($storage_definition);
 }
+
+/**
+ * Implements hook_file_download().
+ */
+function ham_station_file_download($uri) {
+  if (strpos($uri, 'private://ham-station-exports/') !== 0 || substr($uri, -4) !== '.csv') {
+    return NULL;
+  }
+
+  /** @var \Drupal\file\Entity\File $file_entity */
+  $file_entity = \Drupal::entityTypeManager()->getStorage('file')
+    ->loadByProperties(['uri' => $uri]);
+
+  if (empty($file_entity)) {
+    return NULL;
+  }
+
+  $file_entity = reset($file_entity);
+
+  return [
+    'Content-disposition' => 'attachment; filename="' . $file_entity->getFilename() . '"',
+  ];
+}

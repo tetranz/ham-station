@@ -6,6 +6,14 @@ ham_station.config:
   requirements:
     _permission: 'administer site configuration'
 
+ham_station.map_export:
+  path: '/map/export'
+  defaults:
+    _form: '\Drupal\ham_station\Form\ExportForm'
+    _title: 'Amateur Radio License Map Export'
+  requirements:
+    _permission: 'export ham station'
+
 ham_station.ham_map:
   path: '/map/{query_type}/{query_value}'
   defaults:

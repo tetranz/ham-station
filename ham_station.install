@@ -1,8 +1,104 @@
 <?php
 
+use Drupal\ham_station\Exporters\ExportHelper;
+
 /**
  * Install geocode_priority field.
  */
 function ham_station_update_8001() {
-    ham_info_install_entity_field('ham_address', 'geocode_priority');
+  ham_info_install_entity_field('ham_address', 'geocode_priority');
+}
+
+/**
+ *  Create export table.
+ */
+function ham_station_update_8002() {
+  \Drupal::database()
+  ->schema()
+  ->createTable(
+    ExportHelper::EXPORT_TABLE,
+    ham_station_schema()[ExportHelper::EXPORT_TABLE]
+  );
+}
+
+/**
+ * Implements hook_schema();
+ */
+function ham_station_schema() {
+  $schema[ExportHelper::EXPORT_TABLE] = [
+    'fields' => [
+      'batch_uuid' => [
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 255,
+      ],
+      'id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'callsign' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'first_name' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'last_name' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'address' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'city' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'state' => [
+        'type' => 'varchar',
+        'length' => 2,
+      ],
+      'zip' => [
+        'type' => 'varchar',
+        'length' => 10,
+      ],
+      'operator_class' => [
+        'type' => 'varchar',
+        'length' => 1,
+      ],
+      'is_club' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+      ],
+      'latitude' => [
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 7,
+      ],
+      'longitude' => [
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 7,
+      ],
+      'sort_order' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['batch_uuid', 'id'],
+    'unique keys' => [
+      'sort_order' => ['batch_uuid', 'sort_order'],
+    ],
+  ];
+
+  return $schema;
 }

@@ -55,3 +55,6 @@ view published ham location entities:
 
 view unpublished ham location entities:
   title: 'View unpublished Ham location entities'
+
+export ham station:
+  title: 'Export ham station data to CSV file.'

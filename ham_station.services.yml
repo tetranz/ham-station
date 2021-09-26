@@ -38,3 +38,13 @@ services:
     class: Drupal\Core\Config\ImmutableConfig
     factory: config.factory:get
     arguments: ['ham_station.settings']
+
+  ham_station.export_service:
+    class: Drupal\ham_station\Exporters\ExportHelper
+    arguments:
+      - '@database'
+      - '@uuid'
+      - '@messenger'
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@current_user'

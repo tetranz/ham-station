@@ -4,6 +4,7 @@ namespace Drupal\ham_station\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Form for the ham map page.
@@ -110,6 +111,30 @@ class HamMapForm extends FormBase {
       '#tag' => 'p',
       '#value' => $this->t('Processing...'),
       '#attributes' => ['class' => ['processing']],
+    ];
+
+    if (!$this->currentUser()->hasPermission('export ham station')) {
+      return $form;
+    }
+
+    $form['row3'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['row']],
+    ];
+
+    $row3 = &$form['row3'];
+
+    $row3['col_left'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['col-md-3', 'no-bottom-margin']],
+    ];
+
+    $col_left = &$row3['col_left'];
+
+    $col_left['export'] = [
+      '#type' => 'link',
+      '#title' => 'Export to file',
+      '#url' => Url::fromRoute('ham_station.map_export'),
     ];
 
     return $form;
