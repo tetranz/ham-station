@@ -130,7 +130,7 @@ class ExportHelper {
     }
 
     if (!empty($zip)) {
-      $query->condition('ha.address__postal_code', $zip);
+      $query->condition('ha.address__postal_code', $zip . '%', 'LIKE');
     }
 
     return $query;
@@ -161,7 +161,7 @@ class ExportHelper {
     }
 
     if (!empty($zip)) {
-      $query->condition('ha.address__postal_code', $zip);
+      $query->condition('ha.address__postal_code', $zip . '%', 'LIKE');
     }
 
     $stmt = $query->countQuery()->execute();
