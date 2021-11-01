@@ -65,18 +65,18 @@ class HamStationConfigForm extends ConfigFormBase {
     $key = 'max_geocode_batch_size';
     $form[$key] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum geocode batch size.'),
+      '#title' => $this->t('Maximum geocode batch size'),
       '#description' => $this->t('Maximum number of geocodes attempted in each batch.'),
       '#min' => 0,
       '#step' => 1,
       '#default_value' => $config->get($key),
     ];
 
-    $key = 'min_geocode_batch_size';
+    $key = 'geocode_reprocess_batch_size';
     $form[$key] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum geocode batch size.'),
-      '#description' => $this->t('Minimim number of geocodes attempted in each batch. If there are not enough new addresses, enough old addresses will be retried.'),
+      '#title' => $this->t('Geocode reprocess batch size'),
+      '#description' => $this->t('Number of previously not found addresses which are retried in each batch.'),
       '#min' => 0,
       '#step' => 1,
       '#default_value' => $config->get($key),
@@ -96,7 +96,7 @@ class HamStationConfigForm extends ConfigFormBase {
       'google_geocode_api_key',
       'batch_geocoding_enable',
       'max_geocode_batch_size',
-      'min_geocode_batch_size',
+      'geocode_reprocess_batch_size',
     ];
 
     foreach ($keys as $key) {
