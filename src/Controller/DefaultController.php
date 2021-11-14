@@ -4,10 +4,8 @@ namespace Drupal\ham_station\Controller;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Render\Renderer;
 use Drupal\ham_station\Form\HamMapForm;
 use Drupal\ham_station\Query\MapQueryService;
-use Drupal\ham_station\ReportService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,30 +23,16 @@ class DefaultController extends ControllerBase {
   private $mapQueryService;
 
   /**
-   * @var ReportService
-   */
-  private $reportService;
-
-  /**
    * @var Serializer
    */
   private $serializer;
 
-  /**
-   * @var Renderer
-   */
-  private $renderer;
-
   public function __construct(
     MapQueryService $map_query_service,
-    ReportService $report_service,
-    Serializer $serializer,
-    Renderer $renderer
+    Serializer $serializer
   ) {
     $this->mapQueryService = $map_query_service;
-    $this->reportService = $report_service;
     $this->serializer = $serializer;
-    $this->renderer = $renderer;
   }
 
   /**
@@ -57,9 +41,7 @@ class DefaultController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('ham_station.map_query_service'),
-      $container->get('ham_station.report_service'),
-      $container->get('serializer'),
-      $container->get('renderer')
+      $container->get('serializer')
     );
   }
 
